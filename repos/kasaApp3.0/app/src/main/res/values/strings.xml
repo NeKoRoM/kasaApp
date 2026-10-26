@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">kasaApp</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="id_dialog_sub_title">Створити копію з новою позицією?</string>
+    <string name="id_dialog_title">заборонено міняти позицію</string>
+
+    <string name="sl">sl</string>
+    <string name="tak">так</string>
+    <string name="ni">ні</string>
+    <string name="adminPls">попросіть адміністратора вас активувати</string>
+    <string name="camera_Settings">настройки камери</string>
+    <string name="SHASED_PRREF_camera_mode">CAMERA_MODE</string>
+    <string name="kasa_not_answer">каса не відповідає</string>
+    <string name="shore_kasa_in_6">Переконайтесь що каса в 6 режимі і повторіть</string>
+    <string name="accaunt_not_active">аккаунт не активовано</string>
+    <string name="sum">сума</string>
+    <string name="keyboard_state">keyboard_state</string>
+</resources>

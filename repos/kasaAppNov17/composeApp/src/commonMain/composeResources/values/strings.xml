@@ -1,0 +1,7 @@
+<resources>
+    <string name="add_expense">Add expense</string>
+    <string name="description">Description</string>
+    <string name="amount">Amount</string>
+    <string name="total">Total: $%1$d</string>
+    <string name="paid_by">paid by %1$d</string>
+</resources>

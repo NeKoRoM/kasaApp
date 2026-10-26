@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".presentation.fragments.SettingsFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteX="16dp"
+        tools:layout_editor_absoluteY="71dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/kasaSettingsTV"
+                android:layout_width="250dp"
+                android:layout_height="25dp"
+                android:layout_marginTop="16dp"
+                android:text="налаштування каси" />
+
+            <Button
+                android:id="@+id/kasaSettingsButton"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="80dp"
+
+                android:layout_marginBottom="20dp"
+                android:text="команди до каси" />
+
+            <TextView
+                android:id="@+id/editItemTV"
+                android:layout_width="350dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="16dp"
+                android:text="перегляд списку активних параметрів товару" />
+
+            <Button
+                android:id="@+id/editItemSetButton"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="80dp"
+                android:text="Активні поля товарів" />
+            <TextView
+                android:id="@+id/pdvTV"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="16dp"
+                android:text="перегляд груп товарів" />
+
+            <Button
+                android:id="@+id/pdvButton"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="80dp"
+                android:text="настройки груп" />
+            <TextView
+                android:id="@+id/uktzTV"
+                android:layout_width="250dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="16dp"
+                android:text="перегляд УКТЗЕД" />
+
+            <Button
+                android:id="@+id/uktzButton"
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="80dp"
+                android:text="настройки УКТЗЕД" />
+
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.exelioshop">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permissioon.ACCES" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+
+
+    <uses-permission android:name="android.permission.CAMERA" />
+
+
+
+
+
+    <application
+        android:name=".MainApp"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ExelioShop"
+        tools:targetApi="31">
+        <activity
+            android:name=".HeadingActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".MainActivityOld"
+            android:exported="false" />
+        <activity
+            android:name=".ScanerActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditItem"
+            android:exported="false"
+            android:label="@string/title_activity_edit_item"
+            android:theme="@style/Theme.ExelioShop.NoActionBar" />
+        <activity
+            android:name=".NewItem"
+            android:exported="false" />
+        <activity
+            android:name=".BDList"
+            android:exported="false" />
+        <activity
+            android:name=".bluetooth.SelectDevice"
+            android:exported="false" />
+        <activity
+            android:name=".devise_select"
+            android:exported="false" />
+        <activity
+            android:name=".BarCod"
+            android:exported="false" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

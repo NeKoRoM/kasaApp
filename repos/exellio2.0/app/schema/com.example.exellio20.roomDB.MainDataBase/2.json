@@ -1,0 +1,162 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "b91e86b7cb1ef6f4c5787234dbd2470a",
+    "entities": [
+      {
+        "tableName": "article",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `TAX` TEXT NOT NULL, `section` TEXT NOT NULL, `group` TEXT NOT NULL, `type` TEXT NOT NULL, `price` TEXT NOT NULL, `salesAmount` TEXT NOT NULL, `salesCount` TEXT NOT NULL, `remainder` TEXT NOT NULL, `barCode1` TEXT NOT NULL, `barCode2` TEXT NOT NULL, `barCode3` TEXT NOT NULL, `barCode4` TEXT NOT NULL, `name` TEXT NOT NULL, `weightOrUnit` TEXT NOT NULL, `UKTZED` TEXT NOT NULL, `unitOfMeasurement` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "TAX",
+            "columnName": "TAX",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "section",
+            "columnName": "section",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "group",
+            "columnName": "group",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salesAmount",
+            "columnName": "salesAmount",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salesCount",
+            "columnName": "salesCount",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remainder",
+            "columnName": "remainder",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "barCode1",
+            "columnName": "barCode1",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "barCode2",
+            "columnName": "barCode2",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "barCode3",
+            "columnName": "barCode3",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "barCode4",
+            "columnName": "barCode4",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "weightOrUnit",
+            "columnName": "weightOrUnit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "UKTZED",
+            "columnName": "UKTZED",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "unitOfMeasurement",
+            "columnName": "unitOfMeasurement",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "pdv",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `pdvName` TEXT NOT NULL, `pdvValue` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pdvName",
+            "columnName": "pdvName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pdvValue",
+            "columnName": "pdvValue",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b91e86b7cb1ef6f4c5787234dbd2470a')"
+    ]
+  }
+}

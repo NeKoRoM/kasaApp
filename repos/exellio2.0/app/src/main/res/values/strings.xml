@@ -1,0 +1,62 @@
+<resources>
+    <string name="app_name">MobileKasa</string>
+    <string name="open">open.0</string>
+    <string name="close">close.0</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <string name="action_settings">Settings</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="scanMode">включіть режим пк для настройки касси</string>
+    <string name="title_activity_heading">HeadingActivity</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="first_fragment_label">First Fragment</string>
+    <string name="second_fragment_label">Second Fragment</string>
+    <string name="next">Next</string>
+    <string name="previous">Previous</string>
+
+    <string name="hello_first_fragment">Hello first fragment</string>
+    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="unitTV">ДРОБОВА КІЛЬКІСТЬ</string>
+    <string name="bar4TV">ШТРИХ КОД 4</string>
+    <string name="bar3TV">ШТРИХ КОД 3</string>
+    <string name="bar2TV">ШТРИХ КОД 2</string>
+    <string name="bar1TV">ШТРИХ КОД 1</string>
+    <string name="remainderTV">ЗАЛИШОК</string>
+    <string name="salescountTV">ПРОДАНА КІЛЬКІСТЬ</string>
+    <string name="salesamounTV">ПРОДАНО НА СУМУ</string>
+    <string name="typeTV">ТИП ЦІНИ</string>
+    <string name="groupTV">ГРУПА ТОВАРУ</string>
+    <string name="sectionTV">ВІДДІЛ</string>
+    <string name="taxTV">ПОДАТКОВА ГРУПА</string>
+    <string name="priceTV">ЦІНА ТОВАРУ</string>
+    <string name="nameTV">НАЗВА ТОВАРУ</string>
+    <string name="uktzedTV">УКТЗЕД</string>
+    <string name="produktinsetTV">ОДИНИЦЯ ВИМІРУ</string>
+    <string name="set_articleTV">ПРОГРАМУВАТИ</string>
+    <string name="scan_barTV">СКАНУВАТИ ШТРИХ КОД</string>
+    <string name="codeTV">КОД ТОВАРУ</string>
+    <string name="pdvMSwitch">група ПДВ М</string>
+    <string name="pdvXSwitch">група ПДВ Х</string>
+    <string name="pdvGSwitch">група ПДВ Г</string>
+    <string name="pdvVSwitch">група ПДВ В</string>
+    <string name="pdvBSwitch">група ПДВ Б</string>
+    <string name="pdvASwitch">група ПДВ А</string>
+    <string name="zbirASwitch"> Акцизний збір А</string>
+    <string name="zbirBSwitch"> Акцизний збір Б</string>
+    <string name="zbirVSwitch"> Акцизний збір В</string>
+    <string name="pdvHSwitch">група ПДВ Н</string>
+    <string name="zbirGSwitch"> Акцизний збір Г</string>
+    <string name="zbirXSwitch"> Акцизний збір Х</string>
+    <string name="zbirMSwitch"> Акцизний збір М</string>
+    <string name="zbirHSwitch"> Акцизний збір Н</string>
+    <string name="zbirKSwitch"> Акцизний збір К</string>
+    <string name="pdvKSwitch">група ПДВ К</string>
+    <string name="buttonAddListGrup">Додати до списку</string>
+    <string name="buttonSendBarCode">ВІДПРАВИТИ</string>
+    <string name="buttonAdListUktz">Додоти до списку</string>
+    <string name="scanner">СКАНЕР</string>
+    <string name="list">ПРОГРАМУВАННЯ ТОВАРІВ</string>
+    <string name="settings">Налаштування</string>
+</resources>

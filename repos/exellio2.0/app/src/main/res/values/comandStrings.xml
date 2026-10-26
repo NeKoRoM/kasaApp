@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="headingCommand">Header</string>
+    <string name="modePk">pk mode</string>
+    <string name="kasaLast">006;L\t100000\t</string>
+    <string name="kasaFirstCode">006;F\t1\t</string>
+    <string name="kasaNext">006;N\t</string>
+</resources>

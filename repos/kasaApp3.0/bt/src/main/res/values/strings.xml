@@ -1,0 +1,11 @@
+<resources>
+    <string name="paired_devices">Спарені пристрої</string>
+    <string name="search_bluetooth">пошук пристроїв...</string>
+    <string name="empty">Пусто</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="to_scan">сканувати</string>
+    <string name="bt_on">включити блютуз</string>
+    <string name="gps_on_please">для коректної роботи пошуку пристроїв поблизу переконайтесь що включена геолокація GPS</string>
+
+</resources>

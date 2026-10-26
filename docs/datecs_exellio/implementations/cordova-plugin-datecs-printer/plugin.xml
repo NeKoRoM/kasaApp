@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="cordova-plugin-datecs-printer"
+        version="0.10.0">
+
+    <name>DatecsPrinter</name>
+    <description>Cordova Datecs Mobile Bluetooth Printer Plugin</description>
+    <license>Apache 2.0</license>
+    <keywords>cordova, bluetooth, printer, datecs</keywords>
+
+    <js-module src="www/printer.js" name="DatecsPrinter">
+        <clobbers target="DatecsPrinter" />
+    </js-module>
+
+    <!-- android -->
+    <platform name="android">
+        <framework src="com.android.support:support-v4:+" value="gradle" />
+
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="DatecsPrinter">
+                <param name="android-package" value="com.giorgiofellipe.datecsprinter.DatecsPrinter"/>
+            </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.BLUETOOTH" />
+            <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+            <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+        </config-file>
+
+        <lib-file src="src/android/com.datecs.api.jar" arch="device" />
+        <source-file src="src/android/DatecsPrinter.java" target-dir="src/com/giorgiofellipe/datecsprinter" />
+        <source-file src="src/android/DatecsSDKWrapper.java" target-dir="src/com/giorgiofellipe/datecsprinter" />
+        <source-file src="src/android/DatecsUtil.java" target-dir="src/com/giorgiofellipe/datecsprinter" />
+        <source-file src="src/android/Printer.java" target-dir="src/com/giorgiofellipe/datecsprinter" />
+        <source-file src="src/android/PrinterInformation.java" target-dir="src/com/giorgiofellipe/datecsprinter" />
+
+        <source-file src="src/android/res/values-pt/strings.xml" target-dir="res/values-pt"/>
+        <source-file src="src/android/res/values-fr/strings.xml" target-dir="res/values-fr"/>
+        <source-file src="src/android/res/values-ar/strings.xml" target-dir="res/values-ar"/>
+
+        <config-file target="res/values/strings.xml" parent="/resources">
+            <string name="connecting">Connecting...</string>
+            <string name="err_disconnect_printer">Error disconnecting printer</string>
+            <string name="err_fetch_st">Error fetching status</string>
+            <string name="err_fetch_tmp">Error fetching temperature</string>
+            <string name="err_lines_number">The number of lines must be between 0 and 255</string>
+            <string name="err_no_bt_adapter">Bluetooth adapter not available</string>
+            <string name="err_no_bt_device">No Bluetooth device found</string>
+            <string name="err_feed_paper">Error feeding paper to the printer</string>
+            <string name="err_print">Error printing</string>
+            <string name="err_print_barcode">Error printing barcode</string>
+            <string name="err_print_img">Error printing image</string>
+            <string name="err_print_rect">Error printing rectangle</string>
+            <string name="err_print_test">Error printing test page</string>
+            <string name="err_set_barcode">Error setting barcode settings</string>
+            <string name="err_bt_socket">Could not create Bluetooth socket</string>
+            <string name="failed_to_connect">Failed to connect: </string>
+            <string name="failed_to_comm">Failed to create communication</string>
+            <string name="failed_to_initialize">Failed to initialize: </string>
+            <string name="low_battery">Low battery</string>
+            <string name="no_paper">No paper</string>
+            <string name="overheating">Overheating</string>
+            <string name="paper_ok">Paper ok</string>
+            <string name="printer">Printer</string>
+            <string name="printer_connected">Printer connected</string>
+            <string name="printer_disconnected">Printer disconnected</string>
+            <string name="err_write">Could not write these bytes to this printer</string>
+            <string name="err_print_qrcode">Error printing QRcode</string>
+        </config-file>
+    </platform>
+</plugin>

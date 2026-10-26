@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".presentation.MainActivity">
+
+
+    <TextView
+        android:id="@+id/dataTextView"
+        android:layout_width="341dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="36dp"
+        android:text="no data"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.414"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/receiveButton"
+        android:layout_width="169dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="4dp"
+        android:text="Get data"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.119"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dataTextView" />
+
+    <Button
+        android:id="@+id/sendButton"
+        android:layout_width="169dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="108dp"
+        android:text="save data"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.119"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/dataTextView" />
+
+    <EditText
+        android:id="@+id/dataEditText"
+        android:layout_width="368dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="put data here"
+        android:inputType="textPersonName"
+        app:layout_constraintTop_toBottomOf="@+id/receiveButton"
+        tools:layout_editor_absoluteX="29dp" />
+</androidx.constraintlayout.widget.ConstraintLayout>

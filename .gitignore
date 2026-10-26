@@ -1,0 +1,97 @@
+# ==========================================
+# KasaApp Ecosystem - Monorepo .gitignore
+# ==========================================
+
+# --- Secrets & Sensitive Data ---
+.github_token
+*.env
+.env
+.env.*
+!.env.example
+local.properties
+*.keystore
+*.jks
+secring.gpg
+credentials.json
+google-services.json
+
+# --- Operating System & IDE ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+*.bak
+
+# --- Android / Java / Kotlin / Gradle ---
+.gradle/
+**/.gradle/
+build/
+**/build/
+!build.gradle.kts
+!settings.gradle.kts
+dist/
+**/dist/
+.kotlin/
+**/.kotlin/
+captures/
+**/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.dex
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+!**/gradle/wrapper/gradle-wrapper.jar
+.jdk*/
+
+# --- Python, Testing & Virtual Environments ---
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+**/.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+*.egg-info/
+.venv/
+**/.venv/
+venv/
+**/venv/
+ENV/
+env/
+
+# --- Databases & Local State ---
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# --- Sockets, Devices & Runtime Links ---
+*.sock
+kasa_serial_port
+**/kasa_serial_port
+
+# --- Monorepo Caches & CLI Artifacts ---
+.module-cache/
+.playwright-cli/
+.cache/
+*.log
+logs/

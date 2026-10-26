@@ -1,0 +1,12 @@
+## VB6 workspace
+
+*.vbw
+*.vbg
+*.bak
+*.log
+*.scc
+**/_del/*
+bin/*
+scripts/*
+contrib/UcsFPHub/scripts/*
+*.conf

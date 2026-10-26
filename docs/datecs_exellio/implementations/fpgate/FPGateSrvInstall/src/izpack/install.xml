@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (C) 2015 EDA Ltd.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<izpack:installation version="5.0"
+                     xmlns:izpack="http://izpack.org/schema/installation"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xsi:schemaLocation="http://izpack.org/schema/installation http://izpack.org/schema/5.0/izpack-installation-5.0.xsd">
+
+    <info>
+        <appname>FPGateSrv</appname>
+        <appversion>@{fpgatesrv.version}</appversion>
+<!--    <appsubpath>myapp</appsubpath> -->
+        <javaversion>1.6</javaversion>
+        <uninstaller write="yes" />
+        <singleinstance>yes</singleinstance>
+        <url>https://github.com/edabg/fpgate</url>
+        <run-privileged condition="izpack.windowsinstall|izpack.macinstall" />
+        <authors>
+            <author name="EDA Ltd." email="support@edabg.com"/>
+        </authors>
+    </info>
+ 
+    <guiprefs resizable="no" width="480" height="360">
+        <laf name="looks">
+            <param name="variant" value="windows" />
+            <os family="windows" />
+        </laf>
+        <modifier key="showDebugWindow" value="true"/>
+    </guiprefs>
+
+    <locale>
+        <langpack iso3="bgr"/>
+<!--        <langpack iso3="eng"/> -->
+    </locale>
+
+    <variables>
+        <variable name="TargetPanel.dir.windows" value="C:\FPGateSrv" />
+        <variable name="DesktopShortcutCheckboxEnabled" value="true" />
+        <variable name="StartupShortcutCheckboxEnabled" value="true" />
+<!--        <variable name="modify.izpack.install" value="true" /> -->
+    </variables>
+    <conditions>
+        <condition id="start-after-install" type="variable">
+            <name>start.after.install</name>
+            <value>true</value>
+        </condition>
+    </conditions>
+    <panels>
+        <panel classname="HelloPanel" />
+<!--        <panel classname="DefaultTargetPanel" />-->
+        <panel classname="LicencePanel"/>
+        <panel classname="TargetPanel">
+            <validator classname="com.izforge.izpack.installer.validator.ConditionValidator"/>
+            <configuration>
+                <!-- Don't show warning if target directory already exists -->
+                <ShowExistingDirectoryWarning>false</ShowExistingDirectoryWarning>
+                <ShowCreateDirectoryMessage>false</ShowCreateDirectoryMessage>
+            </configuration>
+        </panel>    
+        <panel classname="InstallPanel"/>
+        <panel classname="ShortcutPanel"/>
+        <panel classname="UserInputPanel" id="panel_beforeprocess" />
+        <panel classname="ProcessPanel" condition="start-after-install" />
+        <panel classname="SimpleFinishPanel" />
+    </panels>
+    <resources>
+        <res id="Win_shortcutSpec.xml" src="@{izpack.staging}/Win_shortcutSpec.xml" />
+        <res id="Unix_shortcutSpec.xml" src="@{izpack.staging}/Unix_shortcutSpec.xml" />
+        <res id="LicencePanel.licence" src="@{izpack.staging}/license.txt"/>
+        <res id="ProcessPanel.Spec.xml" src="@{izpack.staging}/ProcessPanel.Spec.xml" />
+        <res id="userInputSpec.xml" src="@{izpack.staging}/userInputSpec.xml" />        
+<!--        <res id="userInputSpec.xml" src="@{izpack.staging}/userInputSpec.xml" parse="yes" type="xml"/> -->
+<!--      
+        <res src="@{izpack.staging}/common_resources/img/install-sidebar.png" id="Installer.image"/>
+        <res src="hello.html" id="HTMLHelloPanel.info"/>
+        <res src="license.html" id="HTMLLicencePanel.licence"/>
+-->    
+    </resources>
+<!--    
+    <listeners>
+        <listener classname="RegistryInstallerListener" stage="install" >
+            <os family="windows"/>
+        </listener>
+        <listener classname="RegistryUninstallerListener" stage="uninstall" >
+            <os family="windows"/>
+        </listener>
+    </listeners>    
+-->
+    <natives>
+        <native type="izpack" name="ShellLink.dll">
+            <os family="windows" />
+        </native>    
+        <native type="izpack" name="ShellLink_x64.dll">
+            <os family="windows" />
+        </native>    
+<!--        
+        <native type="3rdparty" name="COIOSHelper.dll" stage="both">
+           <os family="windows"/>
+        </native>
+        <native type="3rdparty" name="COIOSHelper_x64.dll" stage="both">
+           <os family="windows"/>
+        </native>
+-->                
+    </natives>    
+    <packs>
+        <pack name="fpgatesrv" required="yes">
+            <description>FPGateSrv Installation</description>
+            <singlefile src="@{project.fpgatesrv.target}/FPGateSrv-@{fpgatesrv.version}-WL.jar" target="$INSTALL_PATH/bin/FPGateSrv.jar" />
+            <executable targetfile="$INSTALL_PATH/bin/FPGateSrv.jar" type="bin" stage="never" failure ="ignore" keep="true" os="unix" />
+            <singlefile src="@{izpack.staging}/FPGateSrv.cmd" target="$INSTALL_PATH/bin/FPGateSrv.cmd" os="windows" />
+            <singlefile src="@{izpack.staging}/FPGateSrv.sh" target="$INSTALL_PATH/bin/FPGateSrv.sh" os="unix" />
+            <parsable targetfile="$INSTALL_PATH/bin/FPGateSrv.cmd" os="windows" />
+            <parsable targetfile="$INSTALL_PATH/bin/FPGateSrv.sh" os="unix" />
+            <executable targetfile="$INSTALL_PATH/bin/FPGateSrv.sh" type="bin" stage="never" failure ="ignore" keep="true" os="unix" />
+<!--            <fileset dir="@{project.fpgatesrv.target}/classes" includes="*.dll"  targetdir="$INSTALL_PATH/bin" override="true" />-->
+                <fileset dir="@{project.fpgatesrv.target}/../lib/tremol" excludes="HttpServerSettings.xml" targetdir="$INSTALL_PATH/lib/tremol" override="true" />
+                <executable targetfile="$INSTALL_PATH/lib/tremol/zfplabserver" type="bin" stage="never" failure ="ignore" keep="true" />
+                <executable targetfile="$INSTALL_PATH/lib/tremol/zfplabserver_arm" type="bin" stage="never" failure ="ignore" keep="true" />
+                <singlefile src="@{project.fpgatesrv.target}/../lib/tremol/HttpServerSettings.xml" target="$INSTALL_PATH/lib/tremol/HttpServerSettings.xml" override="false" />
+<!--            <fileset dir="@{project.fpgatesrv.target}/../lib/" includes="*.dll"  targetdir="$INSTALL_PATH/lib" override="true" />-->
+<!--            <fileset dir="@{project.fpgatesrv.target}/../lib/x86/" includes="*.dll"  targetdir="$INSTALL_PATH/lib/x86" override="true" />-->
+<!--            <fileset dir="@{project.fpgatesrv.target}/../lib/x64/" includes="*.dll"  targetdir="$INSTALL_PATH/lib/x64" override="true" />-->
+            <fileset dir="@{project.fpgatesrv.target}/../public_html" includes="**"  targetdir="$INSTALL_PATH/public_html" override="true" />
+            <fileset dir="@{project.fpgatesrv.target}/../" includes="logs"  targetdir="$INSTALL_PATH/" override="true" />
+            <fileset dir="@{project.fpgatesrv.target}/../ssl" includes="*.jks"  targetdir="$INSTALL_PATH/ssl" override="true" />
+            <singlefile src="@{izpack.staging}/license.txt" target="$INSTALL_PATH/license.txt" />
+        </pack>
+    </packs>
+ 
+</izpack:installation>

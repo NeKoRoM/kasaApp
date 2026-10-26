@@ -1,0 +1,8 @@
+<resources>
+    <string name="paired_devices">Спарені пристрої</string>
+    <string name="search_bluetooth">пошук пристроїв...</string>
+    <string name="empty">Пусто</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>

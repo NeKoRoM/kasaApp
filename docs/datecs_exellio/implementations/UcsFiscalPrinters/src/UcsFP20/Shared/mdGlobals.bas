@@ -1,0 +1,1881 @@
+Attribute VB_Name = "mdGlobals"
+'=========================================================================
+'
+' UcsFP20 (c) 2008-2024 by Unicontsoft
+'
+' Unicontsoft Fiscal Printers Component 2.0
+'
+' This project is licensed under the terms of the MIT license
+' See the LICENSE file in the project root for more information
+'
+'=========================================================================
+'
+' Global functions, constants and variables
+'
+'=========================================================================
+Option Explicit
+DefObj A-Z
+Private Const MODULE_NAME As String = "mdGlobals"
+
+'=========================================================================
+' Public Enums
+'=========================================================================
+
+Public Enum UcsRegistryRootsEnum
+    HKEY_CLASSES_ROOT = &H80000000
+    HKEY_LOCAL_MACHINE = &H80000002
+End Enum
+
+Public Type UcsParsedUrl
+    Protocol        As String
+    Host            As String
+    Port            As Long
+    Path            As String
+    User            As String
+    Pass            As String
+End Type
+
+'=========================================================================
+' API
+'=========================================================================
+
+'--- for CreateFile
+Private Const GENERIC_READ                  As Long = &H80000000
+Private Const GENERIC_WRITE                 As Long = &H40000000
+Private Const OPEN_EXISTING                 As Long = 3
+Private Const INVALID_HANDLE_VALUE          As Long = -1
+'--- for FormatMessage
+Private Const FORMAT_MESSAGE_FROM_SYSTEM    As Long = &H1000
+Private Const FORMAT_MESSAGE_IGNORE_INSERTS As Long = &H200
+'--- error codes
+Private Const ERROR_ACCESS_DENIED           As Long = 5&
+Private Const ERROR_GEN_FAILURE             As Long = 31&
+Private Const ERROR_SHARING_VIOLATION       As Long = 32&
+Private Const ERROR_SEM_TIMEOUT             As Long = 121&
+'--- for GetLocaleInfo
+Private Const LOCALE_USER_DEFAULT           As Long = &H400
+Private Const LOCALE_SDECIMAL               As Long = &HE   ' decimal separator
+'--- registry
+Private Const REG_SZ                        As Long = 1
+Private Const REG_EXPAND_SZ                 As Long = 2
+Private Const REG_DWORD                     As Long = 4
+'--- for VariantChangeType
+Private Const VARIANT_ALPHABOOL             As Long = 2
+'--- for CryptStringToBinary
+Private Const CRYPT_STRING_BASE64           As Long = 1
+
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (lpDst As Any, lpSrc As Any, ByVal ByteLength As Long)
+Private Declare Function FormatMessage Lib "kernel32" Alias "FormatMessageA" (ByVal dwFlags As Long, lpSource As Long, ByVal dwMessageId As Long, ByVal dwLanguageId As Long, ByVal lpBuffer As String, ByVal nSize As Long, Args As Any) As Long
+Private Declare Function GetVersionEx Lib "kernel32" Alias "GetVersionExA" (lpVersionInformation As OSVERSIONINFO) As Long
+Private Declare Function GetVersion Lib "kernel32" () As Long
+Private Declare Function QueryDosDevice Lib "kernel32" Alias "QueryDosDeviceA" (ByVal lpDeviceName As Long, ByVal lpTargetPath As String, ByVal ucchMax As Long) As Long
+Private Declare Function CreateFile Lib "kernel32" Alias "CreateFileA" (ByVal lpFileName As String, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, ByVal lpSecurityAttributes As Long, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As Long) As Long
+Private Declare Function CloseHandle Lib "kernel32" (ByVal hObject As Long) As Long
+Private Declare Function GetLocaleInfo Lib "kernel32" Alias "GetLocaleInfoA" (ByVal Locale As Long, ByVal LCType As Long, ByVal lpLCData As String, ByVal cchData As Long) As Long
+Private Declare Function RegOpenKeyEx Lib "advapi32" Alias "RegOpenKeyExA" (ByVal hKey As Long, ByVal lpSubKey As String, ByVal ulOptions As Long, ByVal samDesired As Long, phkResult As Long) As Long
+Private Declare Function RegQueryValueEx Lib "advapi32" Alias "RegQueryValueExA" (ByVal hKey As Long, ByVal lpValueName As String, ByVal lpReserved As Long, lpType As Long, lpData As Any, lpcbData As Long) As Long
+Private Declare Function RegSetValueEx Lib "advapi32" Alias "RegSetValueExA" (ByVal hKey As Long, ByVal lpValueName As String, ByVal lpReserved As Long, ByVal dwType As Long, lpData As Any, ByVal cbData As Long) As Long
+Private Declare Function RegCloseKey Lib "advapi32" (ByVal hKey As Long) As Long
+Private Declare Function RegEnumValue Lib "advapi32" Alias "RegEnumValueA" (ByVal hKey As Long, ByVal dwIndex As Long, ByVal lpValueName As String, lpcbValueName As Long, ByVal lpReserved As Long, lpType As Long, lpData As Any, lpcbData As Long) As Long
+Private Declare Function ExpandEnvironmentStrings Lib "kernel32" Alias "ExpandEnvironmentStringsA" (ByVal lpSrc As String, ByVal lpDst As String, ByVal nSize As Long) As Long
+Private Declare Function IsTextUnicode Lib "advapi32" (lpBuffer As Any, ByVal cb As Long, lpi As Long) As Long
+Private Declare Function GetFileAttributes Lib "kernel32" Alias "GetFileAttributesA" (ByVal lpFileName As String) As Long
+Private Declare Function VariantChangeType Lib "oleaut32" (vDest As Variant, Src As Variant, ByVal wFlags As Integer, ByVal vt As Long) As Long
+Private Declare Function WideCharToMultiByte Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, ByVal lpWideCharStr As Long, ByVal cchWideChar As Long, lpMultiByteStr As Any, ByVal cchMultiByte As Long, ByVal lpDefaultChar As Long, ByVal lpUsedDefaultChar As Long) As Long
+Private Declare Function MultiByteToWideChar Lib "kernel32" (ByVal CodePage As Long, ByVal dwFlags As Long, lpMultiByteStr As Any, ByVal cchMultiByte As Long, ByVal lpWideCharStr As Long, ByVal cchWideChar As Long) As Long
+Private Declare Function GetTempPath Lib "kernel32" Alias "GetTempPathA" (ByVal nBufferLength As Long, ByVal lpBuffer As String) As Long
+Private Declare Function QueryPerformanceCounter Lib "kernel32" (lpPerformanceCount As Currency) As Long
+Private Declare Function QueryPerformanceFrequency Lib "kernel32" (lpFrequency As Currency) As Long
+Private Declare Function GetEnvironmentVariable Lib "kernel32" Alias "GetEnvironmentVariableA" (ByVal lpName As String, ByVal lpBuffer As String, ByVal nSize As Long) As Long
+Private Declare Function CryptAcquireContext Lib "advapi32" Alias "CryptAcquireContextW" (phProv As Long, ByVal pszContainer As Long, ByVal pszProvider As Long, ByVal dwProvType As Long, ByVal dwFlags As Long) As Long
+Private Declare Function CryptCreateHash Lib "advapi32" (ByVal hProv As Long, ByVal AlgId As Long, ByVal hKey As Long, ByVal dwFlags As Long, phHash As Long) As Long
+Private Declare Function CryptHashData Lib "advapi32" (ByVal hHash As Long, pbData As Any, ByVal dwDataLen As Long, ByVal dwFlags As Long) As Long
+Private Declare Function CryptDestroyHash Lib "advapi32" (ByVal hHash As Long) As Long
+Private Declare Function CryptGetHashParam Lib "advapi32" (ByVal hHash As Long, ByVal dwParam As Long, pbData As Any, pdwDataLen As Long, ByVal dwFlags As Long) As Long
+Private Declare Function GetComputerName Lib "kernel32" Alias "GetComputerNameA" (ByVal lpBuffer As String, nSize As Long) As Long
+Private Declare Function GetSystemMetrics Lib "user32" (ByVal nIndex As Long) As Long
+Private Declare Function GetCurrentProcessId Lib "kernel32" () As Long
+Private Declare Function ProcessIdToSessionId Lib "kernel32" (ByVal dwProcessID As Long, dwSessionID As Long) As Long
+Private Declare Function CryptStringToBinary Lib "crypt32" Alias "CryptStringToBinaryW" (ByVal pszString As Long, ByVal cchString As Long, ByVal dwFlags As Long, ByVal pbBinary As Long, pcbBinary As Long, Optional ByVal pdwSkip As Long, Optional ByVal pdwFlags As Long) As Long
+Private Declare Function EnumPorts Lib "winspool.drv" Alias "EnumPortsW" (ByVal pName As Long, ByVal Level As Long, ByVal pPorts As Long, ByVal cbBuf As Long, ByRef pcbNeeded As Long, ByRef pcReturned As Long) As Long
+Private Declare Function SysReAllocString Lib "oleaut32" (ByVal pBSTR As Long, Optional ByVal pszStrPtr As Long) As Long
+Private Declare Function OpenPrinter Lib "winspool.drv" Alias "OpenPrinterW" (ByVal pPrinterName As Long, phPrinter As Long, ByVal pDefault As Long) As Long
+Private Declare Function ClosePrinter Lib "winspool.drv" (ByVal hPrinter As Long) As Long
+Private Declare Function GetPrinter Lib "winspool.drv" Alias "GetPrinterW" (ByVal hPrinter As Long, ByVal Level As Long, pPrinter As Any, ByVal cbBuf As Long, pcbNeeded As Long) As Long
+
+Private Type OSVERSIONINFO
+    dwOSVersionInfoSize As Long
+    dwMajorVersion      As Long
+    dwMinorVersion      As Long
+    dwBuildNumber       As Long
+    dwPlatformID        As Long
+    szCSDVersion        As String * 128      '  Maintenance string for PSS usage
+End Type
+
+Private Type VBGUID
+    Data1               As Long
+    Data2               As Integer
+    Data3               As Integer
+    Data4(7)            As Byte
+End Type
+
+Private Type DISPPARAMS
+    rgPointerToVariantArray As Long
+    rgPointerToLongNamedArgs As Long
+    cArgs               As Long
+    cNamedArgs          As Long
+End Type
+
+Private Type EXCEPINFO
+    wCode               As Integer
+    wReserved           As Integer
+    Source              As String
+    Description         As String
+    HelpFile            As String
+    dwHelpContext       As Long
+    pvReserved          As Long
+    pfnDeferredFillIn   As Long
+    sCode               As Long
+End Type
+
+Private Type PORT_INFO_2
+    pPortName           As Long
+    pMonitorName        As Long
+    pDescription        As Long
+    fPortType           As Long
+    Reserved            As Long
+End Type
+
+'=========================================================================
+' Constants and member variables
+'=========================================================================
+
+Public Const LIB_NAME                   As String = "UcsFP20"
+Public Const STR_NONE                   As String = "(N/A)"
+Public Const STR_PROTOCOL_DATECS_X      As String = "DATECS/X"
+Public Const STR_PROTOCOL_DATECS_FP     As String = "DATECS"
+Public Const STR_PROTOCOL_DAISY         As String = "DAISY"
+Public Const STR_PROTOCOL_INCOTEX       As String = "INCOTEX"
+Public Const STR_PROTOCOL_ELTRADE       As String = "ELTRADE"
+Public Const STR_PROTOCOL_TREMOL        As String = "TREMOL"
+Public Const STR_PROTOCOL_ESCPOS        As String = "ESC/POS"
+Public Const STR_PROTOCOL_PROXY         As String = "PROXY"
+Public Const STR_PROTOCOL_LABEL         As String = "LABEL"
+Public Const STR_PROTOCOL_SCALES        As String = "SCALES"
+Public Const STR_CHR1                   As String = "" '--- CHAR(1)
+Public Const DBL_EPSILON                As Double = 0.0000000001
+Public Const FORMAT_BASE_2              As String = "0.00"
+Public Const FORMAT_BASE_3              As String = "0.000"
+Public Const STR_CONNECTOR_ERRORS       As String = "No device info set|%1 failed: %2|Timeout waiting for response"
+Public Const vbLogEventTypeDebug        As Long = vbLogEventTypeInformation + 1
+Public Const vbLogEventTypeDataDump     As Long = vbLogEventTypeInformation + 2
+Public Const STR_ENUM_STATUS_CODE       As String = "ready|busy|failed"
+Private Const STR_VL_PMTTYPE_NAME       As String = "Cash|Cheque|Coupon|Voucher|Packaging|Maintenance|Damage|Card|Bank|Custom1|Custom2|EUR"
+Private Const STR_VL_DISCTYPE_NAME      As String = "Plu|Subtotal|Total|SubtotalAbs"
+Private Const STR_VL_REPORTTYPE_NAME    As String = "Daily|DailyByItems|DailyByDepartments|DailyByItemsAndDepartments|DailyByOperators|MonthlyShort|MonthlyDetailed"
+Public Const MAX_DEVICE_SERIALNO        As Long = 50
+
+Private m_sDecimalSeparator         As String
+Private m_oConfig                   As Object
+Private m_oProtocolConfig           As Object
+Private m_oPortWrapper              As cPortWrapper
+Private m_oLogger                   As cFileLogger
+Private m_dCurrentStartDate         As Date
+Private m_dblCurrentStartTimer      As Double
+Private m_cRegExpCache              As Collection
+Private m_sErrComputerName          As String
+
+'=========================================================================
+' Error handling
+'=========================================================================
+
+Private Sub PrintError(sFunction As String)
+    Debug.Print "Critical error: " & Err.Description & " [" & MODULE_NAME & "." & sFunction & "]"
+    Logger.Log vbLogEventTypeError, MODULE_NAME, sFunction & "(" & Erl & ")", Err.Description
+End Sub
+
+Private Sub RaiseError(sFunction As String)
+    Debug.Print "Critical error: " & Err.Description & " [" & MODULE_NAME & "." & sFunction & "]"
+    Logger.Log vbLogEventTypeError, MODULE_NAME, sFunction & "(" & Erl & ")", Err.Description
+    Err.Raise Err.Number, MODULE_NAME & "." & sFunction & "(" & Erl & ")" & vbCrLf & Err.Source, Err.Description
+End Sub
+
+'=========================================================================
+' Properties
+'=========================================================================
+
+Property Get DecimalSeparator() As String
+    DecimalSeparator = m_sDecimalSeparator
+End Property
+
+Property Get PortWrapper() As cPortWrapper
+    Set PortWrapper = m_oPortWrapper
+End Property
+
+'=========================================================================
+' Functions
+'=========================================================================
+
+Private Sub Main()
+    InitGlobals
+End Sub
+
+Public Sub InitGlobals()
+    Const FUNC_NAME     As String = "InitGlobals"
+    Dim sFile           As String
+    Dim vJson           As Variant
+    Dim sError          As String
+    
+    On Error GoTo EH
+    m_sDecimalSeparator = GetDecimalSeparator()
+    sFile = LocateFile(App.Path & "\" & App.EXEName & ".conf")
+    If LenB(sFile) <> 0 Then
+        Logger.Log vbLogEventTypeDebug, MODULE_NAME, FUNC_NAME, "Loading config file " & sFile
+        If Not JsonParse(ReadTextFile(sFile), vJson, Error:=sError) Then
+            Logger.Log vbLogEventTypeError, MODULE_NAME, FUNC_NAME, "Error in config: " & sError
+        End If
+    End If
+    Set m_oConfig = C_Obj(vJson)
+    Set m_oPortWrapper = New cPortWrapper
+    SetCurrentDateTimer VBA.Now, TimerEx
+    Exit Sub
+EH:
+    PrintError FUNC_NAME
+    Resume Next
+End Sub
+
+Public Property Get At(vData As Variant, ByVal lIdx As Long, Optional sDefault As String) As String
+    On Error GoTo QH
+    At = sDefault
+    If IsArray(vData) Then
+        If lIdx < LBound(vData) Then
+            '--- lIdx = -1 for last element
+            lIdx = UBound(vData) + 1 + lIdx
+        End If
+        If LBound(vData) <= lIdx And lIdx <= UBound(vData) Then
+            At = C_Str(vData(lIdx))
+        End If
+    End If
+QH:
+End Property
+
+Public Function C_Lng(Value As Variant) As Long
+    Dim vDest           As Variant
+    
+    If VarType(Value) = vbLong Then
+        C_Lng = Value
+    ElseIf VariantChangeType(vDest, Value, 0, vbLong) = 0 Then
+        C_Lng = vDest
+    End If
+End Function
+
+Public Function C_Str(Value As Variant) As String
+    Dim vDest           As Variant
+    
+    If VarType(Value) = vbString Then
+        C_Str = Value
+    ElseIf VariantChangeType(vDest, Value, VARIANT_ALPHABOOL, vbString) = 0 Then
+        C_Str = vDest
+    End If
+End Function
+
+Public Function C_Bool(Value As Variant) As Boolean
+    Dim vDest           As Variant
+    
+    If VarType(Value) = vbBoolean Then
+        C_Bool = Value
+    ElseIf VariantChangeType(vDest, Value, VARIANT_ALPHABOOL, vbBoolean) = 0 Then
+        C_Bool = vDest
+    End If
+End Function
+
+Public Function C_Dbl(Value As Variant) As Double
+    Dim vDest           As Variant
+    
+    If VarType(Value) = vbDouble Then
+        C_Dbl = Value
+    ElseIf VariantChangeType(vDest, Replace(C_Str(Value), ".", m_sDecimalSeparator), 0, vbDouble) = 0 Then
+        C_Dbl = vDest
+    End If
+End Function
+
+Public Function C_Date(Value As Variant) As Date
+    Dim vDest           As Variant
+    
+    If VarType(Value) = vbDate Then
+        C_Date = Value
+    ElseIf VariantChangeType(vDest, Value, 0, vbDate) = 0 Then
+        C_Date = vDest
+    End If
+End Function
+
+Public Function C_Obj(Value As Variant) As Object
+    Dim vDest       As Variant
+
+    If VarType(Value) = vbObject Then
+        Set C_Obj = Value
+    ElseIf VariantChangeType(vDest, Value, 0, vbObject) = 0 Then
+        Set C_Obj = vDest
+    End If
+End Function
+
+Public Function C_Val(Text As String) As Double
+    On Error GoTo QH
+    C_Val = Val(Text)
+QH:
+End Function
+
+Public Function Zn(sText As String, Optional IfEmptyString As Variant = Null) As Variant
+    Zn = IIf(LenB(sText) = 0, IfEmptyString, sText)
+End Function
+
+Public Function Znl(ByVal lValue As Long, Optional IfEmptyLong As Variant = Null, Optional ByVal EmptyLong As Long = 0) As Variant
+    Znl = IIf(lValue = EmptyLong, IfEmptyLong, lValue)
+End Function
+
+Public Function Znd(ByVal dDate As Date, Optional IfEmptyDate As Variant = Null) As Variant
+    Znd = IIf(dDate = 0, IfEmptyDate, dDate)
+End Function
+
+Public Function Zndbl(ByVal dblValue As Double, Optional IfZeroDouble As Variant = Null) As Variant
+    Zndbl = IIf(C_Dbl(CStr(dblValue)) = 0, IfZeroDouble, dblValue)
+End Function
+
+Public Function GetErrorDescription(ByVal ErrorCode As Long) As String
+    Dim lSize           As Long
+   
+    GetErrorDescription = Space$(2000)
+    lSize = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM Or FORMAT_MESSAGE_IGNORE_INSERTS, 0, ErrorCode, 0, GetErrorDescription, Len(GetErrorDescription), 0)
+    If lSize > 2 Then
+        If Mid$(GetErrorDescription, lSize - 1, 2) = vbCrLf Then
+            lSize = lSize - 2
+        End If
+    End If
+    GetErrorDescription = Left$(GetErrorDescription, lSize)
+End Function
+
+Public Property Get IsNT() As Boolean
+    Static lVersion     As Long
+    
+    If lVersion = 0 Then
+        lVersion = GetVersion()
+    End If
+    IsNT = ((lVersion And &H80000000) = 0)
+End Property
+
+Public Property Get OsVersion() As Long
+    Static lVersion     As Long
+    Dim uVer            As OSVERSIONINFO
+
+    If lVersion = 0 Then
+        uVer.dwOSVersionInfoSize = Len(uVer)
+        If GetVersionEx(uVer) Then
+            lVersion = uVer.dwMajorVersion * 100 + uVer.dwMinorVersion
+        End If
+    End If
+    OsVersion = lVersion
+End Property
+
+Public Function EnumSerialPorts() As Variant
+    Const FUNC_NAME     As String = "EnumSerialPorts"
+    Dim sBuffer         As String
+    Dim lIdx            As Long
+    Dim hFile           As Long
+    Dim vRet            As Variant
+    Dim lCount          As Long
+    
+    On Error GoTo EH
+    ReDim vRet(0 To 255) As Variant
+    If IsNT Then
+        sBuffer = String$(100000, 1)
+        Call QueryDosDevice(0, sBuffer, Len(sBuffer))
+        sBuffer = vbNullChar & sBuffer
+        For lIdx = 1 To 255
+            If InStr(1, sBuffer, vbNullChar & "COM" & lIdx & vbNullChar, vbTextCompare) > 0 Then
+                vRet(lCount) = "COM" & lIdx
+                lCount = lCount + 1
+            End If
+        Next
+    Else
+        For lIdx = 1 To 255
+            hFile = CreateFile("COM" & lIdx, GENERIC_READ Or GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0)
+            If hFile = INVALID_HANDLE_VALUE Then
+                Select Case Err.LastDllError
+                Case ERROR_ACCESS_DENIED, ERROR_GEN_FAILURE, ERROR_SHARING_VIOLATION, ERROR_SEM_TIMEOUT
+                    hFile = 0
+                End Select
+            Else
+                Call CloseHandle(hFile)
+                hFile = 0
+            End If
+            If hFile = 0 Then
+                vRet(lCount) = "COM" & lIdx
+                lCount = lCount + 1
+            End If
+        Next
+    End If
+    If lCount = 0 Then
+        vRet = Array()
+    Else
+        ReDim Preserve vRet(0 To lCount - 1) As Variant
+    End If
+    EnumSerialPorts = vRet
+    Exit Function
+EH:
+    PrintError FUNC_NAME
+    Resume Next
+End Function
+
+Public Function EnumUsbPorts() As Variant
+    Const FUNC_NAME     As String = "EnumUsbPorts"
+    Dim cIndex          As Collection
+    Dim vRetVal         As Variant
+    Dim lNeeded         As Long
+    Dim baBuffer()      As Byte
+    Dim lCount          As Long
+    Dim lIdx            As Long
+    Dim uInfo()         As PORT_INFO_2
+    Dim sName           As String
+    
+    On Error GoTo EH
+    Set cIndex = New Collection
+    Call EnumPorts(0, 2, 0, 0, lNeeded, 0)
+    ReDim baBuffer(0 To lNeeded) As Byte
+    If EnumPorts(0, 2, VarPtr(baBuffer(0)), lNeeded, lNeeded, lCount) = 0 Then
+        GoTo QH
+    End If
+    ReDim vRetVal(0 To lCount) As Variant
+    ReDim uInfo(0 To lCount) As PORT_INFO_2
+    Call CopyMemory(uInfo(0), baBuffer(0), lCount * LenB(uInfo(0)))
+    For lIdx = 0 To lCount - 1
+        sName = pvToString(uInfo(lIdx).pPortName)
+        If LCase$(Left$(sName, 3)) = "usb" Then
+            If Not SearchCollection(cIndex, sName) Then
+                vRetVal(cIndex.Count) = sName
+                cIndex.Add sName, sName
+            End If
+        End If
+    Next
+QH:
+    If cIndex.Count = 0 Then
+        vRetVal = Array()
+    Else
+        ReDim Preserve vRetVal(0 To cIndex.Count - 1) As Variant
+    End If
+    EnumUsbPorts = vRetVal
+    Exit Function
+EH:
+    PrintError FUNC_NAME
+    Resume Next
+End Function
+
+Private Function pvToString(ByVal lPtr As Long) As String
+    Call SysReAllocString(VarPtr(pvToString), lPtr)
+End Function
+
+Property Get Logger() As cFileLogger
+    Const FUNC_NAME     As String = "Logger [get]"
+    Dim sFileName       As String
+    Dim vErr            As Variant
+    
+    If m_oLogger Is Nothing Then
+        vErr = Array(Err.Number, Err.Description, Err.Source)
+        On Error GoTo EH
+        sFileName = GetEnvironmentVar("_UCS_FISCAL_PRINTER_LOG")
+        If LenB(sFileName) = 0 Then
+            sFileName = GetErrorTempPath() & "\UcsFP.log"
+            If Not FileExists(sFileName) Then
+                sFileName = vbNullString
+            End If
+        End If
+        Set m_oLogger = New cFileLogger
+        m_oLogger.LogFileName = sFileName
+        m_oLogger.LogLevel = IIf(Val(GetEnvironmentVar("_UCS_FISCAL_PRINTER_DATA_DUMP")) <> 0, vbLogEventTypeDataDump, vbLogEventTypeDebug)
+        On Error GoTo 0
+QH:
+        Err.Number = vErr(0)
+        Err.Description = vErr(1)
+        Err.Source = vErr(2)
+    End If
+    Set Logger = m_oLogger
+    Exit Property
+EH:
+    Debug.Print "Critical error: " & Err.Description & " [" & MODULE_NAME & "." & FUNC_NAME & "(" & Erl & ")]"
+    Resume QH
+End Property
+
+Property Set Logger(oValue As cFileLogger)
+    Set m_oLogger = oValue
+End Property
+
+Public Sub DebugLog(sModule As String, sFunction As String, sText As String, Optional ByVal eType As LogEventTypeConstants = vbLogEventTypeInformation)
+    Logger.Log eType, sModule, sFunction, sText
+End Sub
+
+Public Sub FlushDebugLog()
+    If Not m_oLogger Is Nothing Then
+        m_oLogger.Flush
+    End If
+End Sub
+
+Public Function Round(ByVal Value As Double, Optional ByVal NumDigits As Long) As Double
+    Round = FormatNumber(Value, NumDigits, vbTrue, vbFalse, vbFalse)
+End Function
+
+Public Function Ceil(ByVal Value As Double) As Long
+    Ceil = -Int(-Value)
+End Function
+
+Public Function Floor(ByVal Value As Double) As Long
+    Floor = Int(Value)
+End Function
+
+Public Function GetDecimalSeparator() As String
+    Dim sBuffer         As String
+    Dim nSize           As Long
+
+    sBuffer = Space$(100)
+    nSize = GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDECIMAL, sBuffer, Len(sBuffer))
+    If nSize > 0 Then
+        GetDecimalSeparator = Left$(sBuffer, nSize - 1)
+    Else
+        GetDecimalSeparator = "."
+    End If
+End Function
+
+Public Function IsDelimiter(sText As String) As Boolean
+    Const STR_DELIMS As String = "~#$^&*_+-=\|, " & vbTab & vbCrLf
+    If InStr(1, STR_DELIMS, Left$(sText, 1)) > 0 Then
+        IsDelimiter = True
+    End If
+End Function
+
+Public Function IsWhiteSpace(sText As String) As Boolean
+    Const STR_WHITESPACE As String = " " & vbTab & vbCrLf
+    If InStr(1, STR_WHITESPACE, Left$(sText, 1)) > 0 Then
+        IsWhiteSpace = True
+    End If
+End Function
+
+Public Function WrapMultiline(ByVal sText As String, ByVal lWidth As Long) As Variant
+    Dim vElem           As Variant
+    Dim vRetVal         As Variant
+    Dim lIdx            As Long
+    
+    For Each vElem In Split(sText, vbCrLf)
+        vElem = WrapText(C_Str(vElem), lWidth)
+        If Not IsArray(vRetVal) Then
+            vRetVal = vElem
+        Else
+            ReDim Preserve vRetVal(0 To UBound(vRetVal) + UBound(vElem) + 1) As Variant
+            For lIdx = 0 To UBound(vElem)
+                vRetVal(UBound(vRetVal) - UBound(vElem) + lIdx) = vElem(lIdx)
+            Next
+        End If
+    Next
+    WrapMultiline = vRetVal
+End Function
+
+Public Function WrapText(ByVal sText As String, ByVal lWidth As Long) As Variant
+    Dim lRight          As Long
+    Dim lLeft           As Long
+    Dim vRet            As Variant
+    Dim lCount          As Long
+    
+    If lWidth > 0 Then
+        ReDim vRet(0 To Len(sText)) As Variant
+        Do While LenB(sText) <> 0
+            lRight = lWidth + 1
+            If lRight > Len(sText) Then
+                lRight = Len(sText) + 1
+            Else
+                If IsDelimiter(Mid$(sText, lRight, 1)) Then
+                    Do While IsWhiteSpace(Mid$(sText, lRight, 1)) And lRight <= Len(sText)
+                        lRight = lRight + 1
+                    Loop
+                Else
+                    Do While lRight > 1
+                        If IsDelimiter(Mid$(sText, lRight - 1, 1)) Then
+                            Exit Do
+                        End If
+                        lRight = lRight - 1
+                    Loop
+                    If lRight = 1 Then
+                        lRight = lWidth + 1
+                    End If
+                End If
+            End If
+            lLeft = lRight - 1
+            Do While lLeft > 0
+                If Not IsWhiteSpace(Mid$(sText, lLeft, 1)) Then
+                    Exit Do
+                End If
+                lLeft = lLeft - 1
+            Loop
+            vRet(lCount) = Left$(sText, lLeft)
+            lCount = lCount + 1
+            sText = Mid$(sText, lRight)
+        Loop
+    End If
+    If lCount = 0 Then
+        WrapText = Array(vbNullString)
+    Else
+        ReDim Preserve vRet(0 To lCount - 1) As Variant
+        WrapText = vRet
+    End If
+End Function
+
+Public Function Printf(ByVal sText As String, ParamArray A() As Variant) As String
+    Const LNG_PRIVATE   As Long = &HE1B6& '-- U+E000 to U+F8FF - Private Use Area (PUA)
+    Dim lIdx            As Long
+    
+    For lIdx = UBound(A) To LBound(A) Step -1
+        sText = Replace(sText, "%" & (lIdx - LBound(A) + 1), Replace(A(lIdx), "%", ChrW$(LNG_PRIVATE)))
+    Next
+    Printf = Replace(sText, ChrW$(LNG_PRIVATE), "%")
+End Function
+
+Public Function Clamp( _
+            ByVal lValue As Long, _
+            Optional ByVal lMin As Long = -2147483647, _
+            Optional ByVal lMax As Long = 2147483647) As Long
+    Select Case lValue
+    Case lMin To lMax
+        Clamp = lValue
+    Case Is < lMin
+        Clamp = lMin
+    Case Is > lMax
+        Clamp = lMax
+    End Select
+End Function
+
+Public Function Limit( _
+            ByVal Value As Double, _
+            Optional Min As Variant, _
+            Optional Max As Variant) As Double
+    Limit = Value
+    If Not IsMissing(Min) Then
+        If Value < C_Dbl(Min) Then
+            Limit = C_Dbl(Min)
+        End If
+    End If
+    If Not IsMissing(Max) Then
+        If Value > C_Dbl(Max) Then
+            Limit = C_Dbl(Max)
+        End If
+    End If
+End Function
+
+Public Function SplitCgAddress( _
+            ByVal sAddress As String, _
+            sRow1 As String, _
+            sRow2 As String, _
+            ByVal lRowChars As Long) As String
+    Dim vSplit          As Variant
+    
+    sAddress = Replace(sAddress, "№", "N")
+    Do While Left$(sAddress, 2) = vbCrLf
+        sAddress = LTrim$(Mid$(sAddress, 3))
+    Loop
+    Do While Right$(sAddress, 2) = vbCrLf
+        sAddress = RTrim$(Left$(sAddress, Len(sAddress) - 2))
+    Loop
+    Do While InStr(sAddress, " " & vbCrLf) > 0
+        sAddress = Replace(sAddress, " " & vbCrLf, vbCrLf)
+    Loop
+    sAddress = Replace(sAddress, vbCrLf, "; ")
+    vSplit = WrapText(sAddress, lRowChars)
+    sRow1 = Trim$(At(vSplit, 0))
+    If Right$(sRow1, 1) = ";" Then
+        sRow1 = Left$(sRow1, Len(sRow1) - 1)
+    End If
+    sRow2 = Trim$(At(vSplit, 1))
+    If Right$(sRow2, 1) = ";" Then
+        sRow2 = Left$(sRow2, Len(sRow2) - 1)
+    End If
+End Function
+
+Public Function AlignText( _
+            ByVal sLeft As String, _
+            ByVal sRight As String, _
+            ByVal lWidth As Long) As String
+    sLeft = Left$(sLeft, lWidth)
+    If Left$(sRight, 1) = STR_CHR1 Then
+        sRight = String$(lWidth - Len(sLeft), Right$(sRight, 1))
+    Else
+        sRight = Right$(sRight, lWidth)
+    End If
+    AlignText = sLeft & Space$(lWidth - Len(sLeft))
+    If LenB(sRight) <> 0 Then
+        Mid$(AlignText, lWidth - Len(sRight) + 1, Len(sRight)) = sRight
+    End If
+End Function
+
+Public Function CenterText(ByVal sText As String, ByVal lWidth As Long) As String
+    sText = Left$(sText, lWidth)
+    CenterText = Space$(Clamp((lWidth - Len(sText)) \ 2, 0)) & sText
+End Function
+
+Public Function SumArray(vArray As Variant) As Double
+    Dim vElem           As Variant
+    
+    For Each vElem In vArray
+        SumArray = SumArray + C_Dbl(vElem)
+    Next
+End Function
+
+Public Function RegReadString(ByVal hRoot As UcsRegistryRootsEnum, sKey As String, sValue As String) As String
+    Dim hKey            As Long
+    Dim lType           As Long
+    Dim lNeeded         As Long
+    Dim sBuffer         As String
+    Dim dwBuffer        As Long
+    
+    If RegOpenKeyEx(hRoot, sKey, 0, &H20001, hKey) = 0 Then '--- &H20001 = READ_CONTROL Or KEY_QUERY_VALUE
+        Call RegQueryValueEx(hKey, sValue, 0, lType, ByVal vbNullString, lNeeded)
+        If lType = REG_SZ Or lType = REG_EXPAND_SZ Then
+            sBuffer = String$(lNeeded + 1, 0)
+            If RegQueryValueEx(hKey, sValue, 0, lType, ByVal sBuffer, Len(sBuffer)) = 0 Then
+                sBuffer = Left$(sBuffer, InStr(sBuffer, vbNullChar) - 1)
+                If lType = REG_EXPAND_SZ Then
+                    RegReadString = String$(ExpandEnvironmentStrings(sBuffer, vbNullString, 0), 0)
+                    If ExpandEnvironmentStrings(sBuffer, RegReadString, Len(RegReadString)) > 0 Then
+                        RegReadString = Left$(RegReadString, InStr(RegReadString, vbNullChar) - 1)
+                    Else
+                        RegReadString = sBuffer
+                    End If
+                Else
+                    RegReadString = sBuffer
+                End If
+            End If
+        ElseIf lType = REG_DWORD Then
+            If RegQueryValueEx(hKey, sValue, 0, lType, dwBuffer, 4) = 0 Then
+                RegReadString = dwBuffer
+            End If
+        End If
+        Call RegCloseKey(hKey)
+    End If
+End Function
+
+Public Sub RegWriteValue(ByVal hRoot As UcsRegistryRootsEnum, sKey As String, sValue As String, vValue As Variant)
+    Dim hKey            As Long
+    Dim lTemp           As Long
+    Dim sTemp           As String
+    
+    If RegOpenKeyEx(hRoot, sKey, 0, &H20002, hKey) = 0 Then '--- &H20002 = READ_CONTROL Or KEY_SET_VALUE
+        Select Case VarType(vValue)
+        Case vbLong, vbInteger, vbByte
+            lTemp = C_Lng(vValue)
+            Call RegSetValueEx(hKey, sValue, 0, REG_DWORD, lTemp, 4)
+        Case vbBoolean
+            lTemp = -C_Lng(vValue)
+            Call RegSetValueEx(hKey, sValue, 0, REG_DWORD, lTemp, 4)
+        Case Else
+            sTemp = C_Str(vValue)
+            Call RegSetValueEx(hKey, sValue, 0, REG_SZ, ByVal sTemp, Len(sTemp))
+        End Select
+        Call RegCloseKey(hKey)
+    End If
+End Sub
+
+Public Function RegEnumValues(ByVal hRoot As UcsRegistryRootsEnum, sKey As String) As Variant
+    Dim hKey            As Long
+    Dim sBuffer         As String
+    Dim vRetVal         As Variant
+    Dim lIdx            As Long
+    
+    vRetVal = Array()
+    If RegOpenKeyEx(hRoot, sKey, 0, &H20001, hKey) = 0 Then '--- &H20001 = READ_CONTROL Or KEY_QUERY_VALUE
+        For lIdx = 0 To 2 ^ 30
+            sBuffer = String$(1000, 0)
+            If RegEnumValue(hKey, lIdx, sBuffer, Len(sBuffer) - 1, 0, 0, ByVal 0, 0) <> 0 Then
+                Exit For
+            End If
+            ReDim Preserve vRetVal(0 To UBound(vRetVal) + 1) As Variant
+            vRetVal(UBound(vRetVal)) = Left$(sBuffer, InStr(sBuffer, vbNullChar) - 1)
+        Next
+        Call RegCloseKey(hKey)
+    End If
+    RegEnumValues = vRetVal
+End Function
+
+Public Function Pad(ByVal sText As String, ByVal lSize As Long, Optional ByVal sFill As String) As String
+    If LenB(sFill) = 0 Then
+        sFill = IIf(lSize > 0, " ", "0")
+    End If
+    If lSize > 0 Then
+        Pad = Left$(sText & String(lSize, sFill), lSize)
+    Else
+        Pad = Right$(String(-lSize, sFill) & sText, -lSize)
+    End If
+End Function
+
+Public Function FileExists(sFile As String) As Boolean
+    If GetFileAttributes(sFile) = -1 Then ' INVALID_FILE_ATTRIBUTES
+    Else
+        FileExists = True
+    End If
+End Function
+
+Public Function ReadTextFile(sFile As String) As String
+    Dim BOM_UTF8        As String: BOM_UTF8 = Chr$(&HEF) & Chr$(&HBB) & Chr$(&HBF)
+    Dim BOM_UNICODE     As String: BOM_UNICODE = Chr$(&HFF) & Chr$(&HFE)
+    Const ForReading    As Long = 1
+    Dim lSize           As Long
+    Dim sPrefix         As String
+    
+    With CreateObject("Scripting.FileSystemObject")
+        lSize = .GetFile(sFile).Size
+        If lSize = 0 Then
+            Exit Function
+        End If
+        sPrefix = .OpenTextFile(sFile, ForReading).Read(IIf(lSize < 50, lSize, 50))
+        If Left$(sPrefix, Len(BOM_UTF8)) <> BOM_UTF8 And Left$(sPrefix, Len(BOM_UNICODE)) <> BOM_UNICODE Then
+            '--- special xml encoding test
+            If InStr(1, sPrefix, "<?xml", vbTextCompare) > 0 And InStr(1, sPrefix, "utf-8", vbTextCompare) > 0 Then
+                sPrefix = BOM_UTF8
+            End If
+        End If
+        If Left$(sPrefix, Len(BOM_UTF8)) <> BOM_UTF8 Then
+            On Error GoTo QH
+            ReadTextFile = .OpenTextFile(sFile, ForReading, False, Left$(sPrefix, Len(BOM_UNICODE)) = BOM_UNICODE Or IsTextUnicode(ByVal sPrefix, Len(sPrefix), &HFFFF& - 2) <> 0).ReadAll()
+        Else
+            With CreateObject("ADODB.Stream")
+                .Open
+                If Left$(sPrefix, Len(BOM_UNICODE)) = BOM_UNICODE Then
+                    .Charset = "Unicode"
+                ElseIf Left$(sPrefix, Len(BOM_UTF8)) = BOM_UTF8 Then
+                    .Charset = "UTF-8"
+                Else
+                    .Charset = "_autodetect_all"
+                End If
+                .LoadFromFile sFile
+                ReadTextFile = .ReadText
+            End With
+        End If
+    End With
+QH:
+End Function
+
+Public Sub SetProtocolConfigRoot(oValue As Object)
+    Set m_oProtocolConfig = oValue
+End Sub
+
+Public Function GetConfigValue(sSerial As String, sKey As String, Optional vDefault As Variant) As Variant
+    Const FUNC_NAME     As String = "GetConfigValue"
+    Dim oItem           As Object
+    
+    On Error GoTo EH
+    If LenB(sSerial) <> 0 Then
+        Set oItem = C_Obj(JsonValue(m_oProtocolConfig, sSerial))
+        If oItem Is Nothing Then
+            Set oItem = C_Obj(JsonValue(m_oConfig, sSerial))
+        End If
+        If Not IsEmpty(JsonValue(oItem, sKey)) Then
+            AssignVariant GetConfigValue, JsonValue(oItem, sKey)
+            Exit Function
+        End If
+    End If
+    If IsMissing(vDefault) Then
+        Err.Raise vbObjectError, , "Missing default value for " & sKey
+    End If
+    AssignVariant GetConfigValue, vDefault
+    Exit Function
+EH:
+    RaiseError FUNC_NAME & "(sSerial=" & sSerial & ", sKey=" & sKey & ")"
+End Function
+
+Public Function GetConfigNumber(sSerial As String, sKey As String, ByVal dblDefault As Double) As Double
+    Const FUNC_NAME     As String = "GetConfigNumber"
+    
+    On Error GoTo EH
+    GetConfigNumber = C_Dbl(GetConfigValue(sSerial, sKey, 0))
+    If dblDefault > DBL_EPSILON Then
+        If GetConfigNumber <= 0 Then
+            GetConfigNumber = dblDefault
+        End If
+    ElseIf dblDefault < -DBL_EPSILON Then
+        If GetConfigNumber >= 0 Then
+            GetConfigNumber = dblDefault
+        End If
+    End If
+    Exit Function
+EH:
+    RaiseError FUNC_NAME & "(sSerial=" & sSerial & ", sKey=" & sKey & ")"
+End Function
+
+Public Function GetConfigCollection(sSerial As String, sKey As String) As Collection
+    Const FUNC_NAME     As String = "GetConfigCollection"
+    Dim vValue          As Variant
+    Dim oDict           As Object
+    
+    On Error GoTo EH
+    AssignVariant vValue, GetConfigValue(sSerial, sKey, Empty)
+    If IsObject(vValue) Then
+        Set oDict = JsonToDictionary(C_Obj(vValue))
+        Set GetConfigCollection = New Collection
+        pvAppendConfigCollection oDict, vbNullString, GetConfigCollection
+    End If
+    Exit Function
+EH:
+    RaiseError FUNC_NAME & "(sSerial=" & sSerial & ", sKey=" & sKey & ")"
+End Function
+
+Private Sub pvAppendConfigCollection(oDict As Object, sPrefix As String, oCol As Collection)
+    Dim vKey            As Variant
+    
+    For Each vKey In oDict
+        If IsObject(oDict(vKey)) Then
+            pvAppendConfigCollection oDict(vKey), sPrefix & "\" & vKey, oCol
+        Else
+            oCol.Add oDict(vKey), sPrefix & "\" & vKey
+        End If
+    Next
+End Sub
+
+Public Function LocateFile(sFile As String) As String
+    Dim sDir            As String
+    Dim sName           As String
+    Dim lPos            As Long
+    
+    If InStrRev(sFile, "\") > 0 Then
+        sDir = Left$(sFile, InStrRev(sFile, "\"))
+        sName = Mid$(sFile, InStrRev(sFile, "\") + 1)
+        Do While Not FileExists(sDir & sName)
+            If Len(sDir) > 1 Then
+                lPos = InStrRev(sDir, "\", Len(sDir) - 1)
+                If lPos > 0 Then
+                    sDir = Left$(sDir, lPos)
+                    If Left$(sDir, 2) = "\\" And InStrRev(sDir, "\", Len(sDir) - 1) <= 2 Then
+                        Exit Function
+                    End If
+                Else
+                    Exit Function
+                End If
+            Else
+                Exit Function
+            End If
+        Loop
+        LocateFile = sDir & sName
+    ElseIf FileExists(sFile) Then
+        LocateFile = sFile
+    End If
+End Function
+
+Public Function SafeFormat(Expression As Variant, Optional Fmt As Variant, Optional sDecimal As String = ".") As String
+    SafeFormat = Replace(Format$(Expression, Fmt), m_sDecimalSeparator, sDecimal)
+End Function
+
+Public Function SafeText(sText As String) As String
+    SafeText = preg_replace("[\x00-\x1F]", sText, vbNullString)
+End Function
+
+Public Sub AssignVariant(vDest As Variant, vSrc As Variant)
+    If IsObject(vSrc) Then
+        Set vDest = vSrc
+    Else
+        vDest = vSrc
+    End If
+End Sub
+
+Public Function preg_match(find_re As String, sText As String, Optional Matches As Variant, Optional Indexes As Variant) As Long
+    Dim lIdx            As Long
+    
+    With InitRegExp(find_re).Execute(sText)
+        preg_match = .Count
+        If Not IsMissing(Matches) Then
+            If .Count = 0 Then
+                Matches = Split(vbNullString)
+            ElseIf .Count = 1 Then
+                ReDim Matches(0 To 0) As String
+                Matches(0) = .Item(0).Value
+            Else
+                ReDim Matches(0 To .Count - 1) As String
+                For lIdx = 0 To .Count - 1
+                    Matches(lIdx) = .Item(lIdx).Value
+                Next
+            End If
+        End If
+        If Not IsMissing(Indexes) Then
+            If .Count = 0 Then
+                Indexes = Array()
+            ElseIf .Count = 1 Then
+                Indexes = Array(.Item(0).FirstIndex + 1)
+            Else
+                ReDim Indexes(0 To .Count - 1) As Variant
+                For lIdx = 0 To .Count - 1
+                    Indexes(lIdx) = .Item(lIdx).FirstIndex + 1
+                Next
+            End If
+        End If
+    End With
+End Function
+
+Public Function preg_replace(find_re As String, sText As String, Optional sReplace As String) As String
+    preg_replace = InitRegExp(find_re).Replace(sText, sReplace)
+End Function
+
+Public Function preg_split(find_re As String, sText As String) As Variant
+    Dim esc             As String
+    
+    esc = ChrW$(&HE1B6&) '-- U+E000 to U+F8FF - Private Use Area (PUA)
+    preg_split = Split(InitRegExp(find_re).Replace(sText, esc), esc)
+End Function
+
+Public Function InitRegExp(sPattern As String) As Object
+    Const FUNC_NAME     As String = "InitRegExp"
+    Dim lPos            As Long
+    
+    On Error GoTo EH
+    If Not SearchCollection(m_cRegExpCache, sPattern, RetVal:=InitRegExp) Then
+        Set InitRegExp = CreateObject("VBScript.RegExp")
+        With InitRegExp
+            lPos = InStrRev(sPattern, "/")
+            If Left$(sPattern, 1) = "/" And lPos > 1 Then
+                .Pattern = Mid$(sPattern, 2, lPos - 2)
+                .IgnoreCase = (InStr(lPos, sPattern, "i") > 0)
+                .MultiLine = (InStr(lPos, sPattern, "m") > 0)
+                .Global = (InStr(lPos, sPattern, "l") = 0)
+            Else
+                .Global = True
+                .Pattern = sPattern
+            End If
+        End With
+        If m_cRegExpCache Is Nothing Then
+            Set m_cRegExpCache = New Collection
+        End If
+        m_cRegExpCache.Add InitRegExp, sPattern
+        If m_cRegExpCache.Count > 1000 Then
+            m_cRegExpCache.Remove 1
+        End If
+    End If
+    Exit Function
+EH:
+    PrintError FUNC_NAME
+    Resume Next
+End Function
+
+Public Function GetConfigForCommand(oConfigCmd As Collection, oLocalizedCmd As Collection, sFunction As String, sKey As String, Optional Default As Variant) As Variant
+    Dim sMerged         As String
+    Dim vItem           As Variant
+    
+    sMerged = "\" & sFunction & IIf(LenB(sKey) <> 0, "\" & sKey, vbNullString)
+    If Not SearchCollection(oConfigCmd, sMerged, vItem) Then
+        If Not SearchCollection(oLocalizedCmd, sMerged, vItem) Then
+            If Not IsMissing(Default) Then
+                GetConfigForCommand = Default
+            End If
+            Exit Function
+        End If
+    End If
+    Select Case VarType(Default)
+    Case vbLong, vbInteger, vbByte
+        GetConfigForCommand = C_Lng(vItem)
+    Case vbDouble, vbSingle
+        GetConfigForCommand = C_Dbl(vItem)
+    Case vbString
+        GetConfigForCommand = C_Str(vItem)
+    Case vbBoolean
+        GetConfigForCommand = C_Bool(vItem)
+    End Select
+End Function
+
+Public Property Get TimerEx() As Double
+    Dim cFreq           As Currency
+    Dim cValue          As Currency
+    
+    Call QueryPerformanceFrequency(cFreq)
+    Call QueryPerformanceCounter(cValue)
+    TimerEx = cValue / cFreq
+End Property
+
+Public Function ToHexDump(sText As String) As String
+    Dim lIdx            As Long
+    
+    For lIdx = 1 To Len(sText)
+        ToHexDump = ToHexDump & Right$("0" & Hex$(Asc(Mid$(sText, lIdx, 1))), 2)
+    Next
+End Function
+
+Public Function FromHex(sText As String) As Byte()
+    Dim baRetVal()      As Byte
+    Dim lIdx            As Long
+    
+    On Error GoTo QH
+    '--- check for hexdump delimiter
+    If sText Like "*[!0-9A-Fa-f]*" Then
+        ReDim baRetVal(0 To Len(sText) \ 3) As Byte
+        For lIdx = 1 To Len(sText) Step 3
+            baRetVal(lIdx \ 3) = "&H" & Mid$(sText, lIdx, 2)
+        Next
+    ElseIf LenB(sText) <> 0 Then
+        ReDim baRetVal(0 To Len(sText) \ 2 - 1) As Byte
+        For lIdx = 1 To Len(sText) Step 2
+            baRetVal(lIdx \ 2) = "&H" & Mid$(sText, lIdx, 2)
+        Next
+    Else
+        baRetVal = vbNullString
+    End If
+    FromHex = baRetVal
+QH:
+End Function
+
+Public Function SearchCollection(ByVal pCol As Object, Index As Variant, Optional RetVal As Variant) As Boolean
+    Const DISPID_VALUE  As Long = 0
+    Const VT_BYREF      As Long = &H4000
+    Const S_OK          As Long = 0
+    Dim pVbCol          As IVbCollection
+    Dim vItem           As Variant
+
+    If pCol Is Nothing Then
+        '--- do nothing
+    ElseIf (PeekInt(VarPtr(RetVal)) And VT_BYREF) = 0 Then
+        If TypeOf pCol Is IVbCollection Then
+            Set pVbCol = pCol
+            SearchCollection = (pVbCol.Item(Index, RetVal) = S_OK)
+        Else
+            SearchCollection = DispInvoke(pCol, DISPID_VALUE, VbMethod Or VbGet, RetVal:=RetVal, Args:=Index)
+        End If
+    Else
+        If TypeOf pCol Is IVbCollection Then
+            Set pVbCol = pCol
+            SearchCollection = (pVbCol.Item(Index, vItem) = S_OK)
+        Else
+            SearchCollection = DispInvoke(pCol, DISPID_VALUE, VbMethod Or VbGet, RetVal:=vItem, Args:=Index)
+        End If
+        If SearchCollection Then
+            If IsObject(vItem) Then
+                Set RetVal = vItem
+            Else
+                RetVal = vItem
+            End If
+        End If
+    End If
+End Function
+
+Public Function DispInvoke( _
+            ByVal pDisp As IVbDispatch, _
+            Name As Variant, _
+            Optional ByVal CallType As VbCallType, _
+            Optional Args As Variant, _
+            Optional RetVal As Variant) As Boolean
+    Const DISPID_PROPERTYPUT As Long = -3
+    Const VT_BYREF      As Long = &H4000
+    Dim IID_NULL        As VBGUID
+    Dim lDispID         As Long
+    Dim hResult         As Long
+    Dim uParams         As DISPPARAMS
+    Dim uInfo           As EXCEPINFO
+    Dim aParams()       As Variant
+    Dim lNamedParam     As Long
+    Dim lIdx            As Long
+    Dim lParamCount     As Long
+    Dim lArgErr         As Long
+    Dim lPtrResult      As Long
+    Dim vRetVal         As Variant
+
+    If pDisp Is Nothing Then
+        Exit Function
+    End If
+    '--- get disp id
+    If IsNumeric(Name) Then
+        lDispID = C_Lng(Name)
+    Else
+        hResult = pDisp.GetIDsOfNames(IID_NULL, C_Str(Name), 1, LOCALE_USER_DEFAULT, lDispID)
+        If hResult < 0 Then
+            GoTo QH
+        End If
+    End If
+    If CallType = 0 Then
+        CallType = VbMethod Or IIf(Not IsMissing(RetVal), VbGet, 0)
+    End If
+    '--- process params
+    If Not IsMissing(Args) Then
+        If IsArray(Args) Then
+            lParamCount = UBound(Args) - LBound(Args)
+            ReDim aParams(0 To lParamCount) As Variant
+            For lIdx = 0 To lParamCount
+                Call AssignVariant(aParams(lParamCount - lIdx), Args(lIdx))
+            Next
+        Else
+            ReDim aParams(0 To 0) As Variant
+            Call AssignVariant(aParams(0), Args)
+        End If
+        With uParams
+            .cArgs = lParamCount + 1
+            .rgPointerToVariantArray = VarPtr(aParams(0))
+        End With
+        If (CallType And (VbLet Or VbSet)) <> 0 Then
+            lNamedParam = DISPID_PROPERTYPUT
+            With uParams
+                .cNamedArgs = 1
+                .rgPointerToLongNamedArgs = VarPtr(lNamedParam)
+            End With
+        End If
+    End If
+    If (CallType And VbGet) <> 0 Or (CallType And VbMethod) <> 0 And Not IsMissing(RetVal) Then
+        lPtrResult = VarPtr(RetVal)
+        If (PeekInt(lPtrResult) And VT_BYREF) = 0 Then
+            If IsObject(RetVal) Then
+                Set RetVal = Nothing
+            Else
+                RetVal = Empty
+            End If
+        Else
+            lPtrResult = VarPtr(vRetVal)
+            If IsObject(RetVal) Then
+                Set vRetVal = Nothing
+            Else
+                vRetVal = Empty
+            End If
+        End If
+    End If
+    hResult = pDisp.Invoke(lDispID, IID_NULL, LOCALE_USER_DEFAULT, CallType, uParams, ByVal lPtrResult, uInfo, lArgErr)
+    If hResult < 0 Then
+        GoTo QH
+    End If
+    If lPtrResult = VarPtr(vRetVal) Then
+        If IsObject(vRetVal) Then
+            Set RetVal = vRetVal
+        Else
+            RetVal = vRetVal
+        End If
+    End If
+    '--- success
+    DispInvoke = True
+    Exit Function
+QH:
+    If VarType(RetVal) = vbVariant Then
+        RetVal = Array(hResult, uInfo.sCode, uInfo.Description, uInfo.Source)
+    End If
+End Function
+
+Public Function ParseSum(sValue As String) As Double
+    If InStr(sValue, ".") > 0 Then
+        ParseSum = C_Dbl(sValue)
+    Else
+        ParseSum = C_Dbl(sValue) / 100#
+    End If
+End Function
+
+Public Function ToMultiByte(sSend As String, Optional ByVal CodePage As Long) As Byte()
+    Dim lSize           As Long
+    Dim baRetVal()      As Byte
+    
+    lSize = WideCharToMultiByte(CodePage, 0, StrPtr(sSend), Len(sSend), ByVal 0, 0, 0, 0)
+    If lSize > 0 Then
+        ReDim baRetVal(0 To lSize - 1) As Byte
+        Call WideCharToMultiByte(CodePage, 0, StrPtr(sSend), Len(sSend), baRetVal(0), lSize, 0, 0)
+    Else
+        baRetVal = " "
+    End If
+    ToMultiByte = baRetVal
+End Function
+
+Public Function FromMultiByte(baRecv() As Byte, Optional ByVal CodePage As Long) As String
+    Dim lSize           As Long
+    
+    If UBound(baRecv) >= 0 Then
+        lSize = MultiByteToWideChar(CodePage, 0, baRecv(0), UBound(baRecv) + 1, 0, 0)
+        If lSize > 0 Then
+            FromMultiByte = String$(lSize, 0)
+            lSize = MultiByteToWideChar(CodePage, 0, baRecv(0), UBound(baRecv) + 1, StrPtr(FromMultiByte), lSize)
+        End If
+    End If
+End Function
+
+Public Function ToMultiByteChar(sText As String, Optional ByVal CodePage As Long) As Long
+    Call WideCharToMultiByte(CodePage, 0, StrPtr(sText), 1, ToMultiByteChar, 1, 0, 0)
+End Function
+
+Public Function FromMultiByteChar(ByVal lChar As Long, Optional ByVal CodePage As Long) As String
+    FromMultiByteChar = vbNullChar
+    Call MultiByteToWideChar(CodePage, 0, lChar, 1, StrPtr(FromMultiByteChar), 1)
+End Function
+
+Public Function SplitOrReindex(Expression As String, Delimiter As String) As Variant
+    Dim vResult         As Variant
+    Dim lIdx            As Long
+    Dim lSize           As Long
+    
+    SplitOrReindex = Split(Expression, Delimiter)
+    '--- check if reindex needed
+    If IsNumeric(At(SplitOrReindex, 0)) Then
+        For lIdx = 0 To UBound(SplitOrReindex) Step 2
+            lSize = Clamp(lSize, C_Lng(At(SplitOrReindex, lIdx)))
+        Next
+        ReDim vResult(0 To lSize) As Variant
+        For lIdx = 0 To UBound(SplitOrReindex) Step 2
+            vResult(C_Lng(At(SplitOrReindex, lIdx))) = At(SplitOrReindex, lIdx + 1)
+        Next
+        SplitOrReindex = vResult
+    End If
+End Function
+
+Public Function InitDeviceConnector( _
+            sDevice As String, _
+            ByVal lTimeout As Long, _
+            Optional LocalizedConnectorErrors As String, _
+            Optional Error As String) As IDeviceConnector
+    Dim oSerialPortConn As cSerialPortConnector
+    Dim oSocketConn     As cSocketConnector
+    Dim oUsbConn        As cUsbConnector
+    
+    If LenB(sDevice) = 0 Then
+        Error = At(Split(LocalizedConnectorErrors, "|"), ucsErrNoDeviceInfoSet, "No device info set")
+        GoTo QH
+    End If
+    If LCase$(Left$(sDevice, 3)) = "com" Then
+        Set oSerialPortConn = New cSerialPortConnector
+        If LenB(LocalizedConnectorErrors) <> 0 Then
+            oSerialPortConn.LocalizedText(ucsFscLciInternalErrors) = LocalizedConnectorErrors
+        End If
+        If Not oSerialPortConn.Init(sDevice, lTimeout) Then
+            Error = oSerialPortConn.GetLastError()
+            GoTo QH
+        End If
+        Set InitDeviceConnector = oSerialPortConn
+    ElseIf InStr(sDevice, ":") = 0 Then
+        Set oUsbConn = New cUsbConnector
+        If LenB(LocalizedConnectorErrors) <> 0 Then
+            oUsbConn.LocalizedText(ucsFscLciInternalErrors) = LocalizedConnectorErrors
+        End If
+        If Not oUsbConn.Init(sDevice, lTimeout) Then
+            Error = oUsbConn.GetLastError()
+            GoTo QH
+        End If
+        Set InitDeviceConnector = oUsbConn
+    Else
+        Set oSocketConn = New cSocketConnector
+        If Not oSocketConn.Init(sDevice, lTimeout) Then
+            Error = oSocketConn.GetErrorDescription(oSocketConn.LastError)
+            GoTo QH
+        End If
+        Set InitDeviceConnector = oSocketConn
+    End If
+QH:
+End Function
+
+Public Function Peek(ByVal lPtr As Long) As Long
+    Call CopyMemory(Peek, ByVal lPtr, 4)
+End Function
+
+Public Function PeekInt(ByVal lPtr As Long) As Integer
+    Call CopyMemory(PeekInt, ByVal lPtr, 2)
+End Function
+
+Public Function GetErrorTempPath() As String
+    Dim sBuffer         As String
+    
+    sBuffer = String$(2000, 0)
+    Call GetTempPath(Len(sBuffer) - 1, sBuffer)
+    GetErrorTempPath = Left$(sBuffer, InStr(sBuffer, vbNullChar) - 1)
+    If Right$(GetErrorTempPath, 1) = "\" Then
+        GetErrorTempPath = Left$(GetErrorTempPath, Len(GetErrorTempPath) - 1)
+    End If
+End Function
+
+Private Function pvParseTokenByRegExp(sText As String, sPattern As String) As String
+    Dim oCol            As Object
+    
+    Set oCol = InitRegExp(sPattern).Execute(sText)
+    If oCol.Count > 0 Then
+        pvParseTokenByRegExp = oCol.Item(0).SubMatches(0)
+        sText = Mid$(sText, oCol.Item(0).FirstIndex + oCol.Item(0).Length + 1)
+    End If
+End Function
+
+Public Function ParseDeviceString(ByVal sDeviceString As String, Optional Separator As String = ";") As Object
+    Const KEY_PATTERN   As String = "^([^=]+)="
+    Const VALUE_PATTERN As String = "^\s*('(?:''|[^'])*'|""(?:""""|[^""])*""|[^;]*)\s*;?"
+    Const ASC_QUOTE     As Long = 39
+    Const ASC_DBL_QUOTE As Long = 34
+    Dim sKey            As String
+    Dim sValue          As String
+    Dim oRetVal         As Object
+    Dim lChar           As Long
+    
+    Do
+        sKey = Trim$(pvParseTokenByRegExp(sDeviceString, KEY_PATTERN))
+        If LenB(sKey) = 0 Then
+            Exit Do
+        End If
+        sValue = Trim$(pvParseTokenByRegExp(sDeviceString, Replace(VALUE_PATTERN, ";", Separator)))
+        If Len(sValue) >= 2 Then
+            If Left$(sValue, 1) = Right$(sValue, 1) Then
+                lChar = Asc(sValue)
+                Select Case lChar
+                Case ASC_QUOTE, ASC_DBL_QUOTE
+                    sValue = Replace(Mid$(sValue, 2, Len(sValue) - 2), Chr$(lChar) & Chr$(lChar), Chr$(lChar))
+                End Select
+            End If
+        End If
+        JsonValue(oRetVal, sKey) = sValue
+    Loop
+    Set ParseDeviceString = oRetVal
+End Function
+
+Public Function ToDeviceString(oMap As Object, Optional Separator As String = ";") As String
+    Dim vKey            As Variant
+    Dim sValue          As String
+    Dim sRetVal         As String
+    
+    For Each vKey In JsonKeys(oMap)
+        '--- try to escape value
+        sValue = C_Str(JsonValue(oMap, vKey))
+        Select Case True
+        Case InStr(sValue, Separator) > 0, InStr(sValue, """") > 0, InStr(sValue, "'") > 0
+            sValue = """" & Replace(sValue, """", """""") & """"
+        End Select
+        sRetVal = IIf(LenB(sRetVal) <> 0, sRetVal & Separator, vbNullString) & vKey & "=" & sValue
+    Next
+    ToDeviceString = sRetVal
+End Function
+
+Public Function GetEnvironmentVar(sName As String) As String
+    Dim sBuffer         As String
+    
+    sBuffer = String$(2000, 0)
+    Call GetEnvironmentVariable(sName, sBuffer, Len(sBuffer) - 1)
+    GetEnvironmentVar = Left$(sBuffer, InStr(sBuffer, vbNullChar) - 1)
+End Function
+
+Public Function StripZeros(ByVal sText As String) As String
+    Dim lIdx            As Long
+    
+    sText = Trim$(sText)
+    For lIdx = 1 To Len(sText) - 1
+        If Mid$(sText, lIdx, 1) <> "0" Then
+            Exit For
+        End If
+    Next
+    StripZeros = Trim$(Mid$(sText, lIdx))
+End Function
+
+Public Function JsonEnumValue(vValue As Variant, sList As String) As Long
+    Dim sText           As String
+    Dim vElem           As Variant
+    Dim lIdx            As Long
+    
+    If VarType(vValue) = vbString Then
+        sText = LCase$(vValue)
+        If LenB(sText) <> 0 Then
+            If InStr(1, "|" & sList & "|", "|" & sText & "|", vbTextCompare) > 0 Then
+                For Each vElem In Split(LCase$(sList), "|")
+                    If sText = vElem Then
+                        JsonEnumValue = lIdx
+                        Exit Function
+                    End If
+                    lIdx = lIdx + 1
+                Next
+            End If
+        End If
+    End If
+    JsonEnumValue = C_Lng(vValue)
+End Function
+
+Public Function JsonBoolItem(oJson As Object, sKey As String, Optional ByVal Default As Boolean) As Boolean
+    Dim vValue          As Variant
+    
+    AssignVariant vValue, JsonValue(oJson, sKey)
+    If VarType(vValue) = vbString Then
+        Select Case LCase$(vValue)
+        Case "y", "yes", "true", "on", "д", "да"
+            JsonBoolItem = True
+        Case "n", "no", "false", "off", "н", "не"
+            JsonBoolItem = False
+        Case Else
+            If IsNumeric(vValue) Then
+                JsonBoolItem = C_Bool(vValue)
+            Else
+                JsonBoolItem = Default
+            End If
+        End Select
+    ElseIf IsEmpty(vValue) Then
+        JsonBoolItem = Default
+    ElseIf IsNumeric(vValue) Then
+        JsonBoolItem = C_Bool(vValue)
+    Else
+        JsonBoolItem = Default
+    End If
+End Function
+
+Public Function ToConnectorDevice( _
+            oOptions As Object, _
+            ByVal DefSocketPort As Long, _
+            oProtocol As IDeviceProtocol) As String
+    Const DEF_SERIAL_PORT As String = "COM1"
+    Const DEF_SERIAL_SPEED As Long = 115200
+    Dim vPorts          As Variant
+    Dim vElem           As Variant
+    
+    If LenB(JsonValue(oOptions, "IP")) <> 0 Then
+        ToConnectorDevice = Trim$(JsonValue(oOptions, "IP"))
+        If InStr(ToConnectorDevice, ":") = 0 Then
+            ToConnectorDevice = ToConnectorDevice & ":" & Znl(C_Lng(JsonValue(oOptions, "Port")), DefSocketPort)
+        End If
+    ElseIf LenB(JsonValue(oOptions, "USB")) <> 0 Then
+        ToConnectorDevice = Trim$(JsonValue(oOptions, "USB"))
+    Else
+        If Not oProtocol Is Nothing Then
+            If LenB(JsonValue(oOptions, "Port")) = 0 Then
+                vPorts = EnumSerialPorts
+            ElseIf LenB(JsonValue(oOptions, "Speed")) = 0 Then
+                If LCase$(Left$(JsonValue(oOptions, "Port"), 3)) = "com" Then
+                    vPorts = Array(JsonValue(oOptions, "Port"))
+                Else
+                    ToConnectorDevice = Trim$(JsonValue(oOptions, "Port"))
+                    GoTo QH
+                End If
+            End If
+            If IsArray(vPorts) Then
+                vPorts = oProtocol.AutodetectDevices(vPorts)
+                For Each vElem In vPorts
+                    If IsArray(vElem) Then
+                        If JsonValue(oOptions, "Protocol") = Zn(Trim$(At(vElem, 2)), Empty) Then
+                            If LenB(JsonValue(oOptions, "Port")) = 0 Then
+                                JsonValue(oOptions, "Port") = Zn(Trim$(At(vElem, 0)), Empty)
+                            End If
+                            If LenB(JsonValue(oOptions, "Speed")) = 0 Then
+                                JsonValue(oOptions, "Speed") = Zn(Trim$(At(vElem, 1)), Empty)
+                            End If
+                            If LenB(JsonValue(oOptions, "DeviceSerialNo")) = 0 Then
+                                JsonValue(oOptions, "DeviceSerialNo") = Zn(Trim$(At(vElem, 5)), Empty)
+                            End If
+                            If LenB(JsonValue(oOptions, "FiscalMemoryNo")) = 0 Then
+                                JsonValue(oOptions, "FiscalMemoryNo") = Zn(Trim$(At(vElem, 6)), Empty)
+                            End If
+                            Exit For
+                        End If
+                    End If
+                Next
+                If LenB(JsonValue(oOptions, "Speed")) = 0 Then
+                    GoTo QH
+                End If
+            End If
+        End If
+        ToConnectorDevice = Zn(Trim$(JsonValue(oOptions, "Port")), DEF_SERIAL_PORT) & _
+            "," & Znl(C_Lng(JsonValue(oOptions, "Speed")), DEF_SERIAL_SPEED) & _
+            "," & JsonBoolItem(oOptions, "Persistent") & _
+            "," & Znl(C_Lng(JsonValue(oOptions, "BaudRate")), 8) & _
+            "," & IIf(JsonBoolItem(oOptions, "Parity"), "Y", "N") & _
+            "," & Znl(C_Lng(JsonValue(oOptions, "StopBits")), 1)
+    End If
+QH:
+End Function
+
+Public Function InitRequest( _
+            sType As String, _
+            sUrl As String, _
+            Optional ByVal Timeout As Single, _
+            Optional ByVal Async As Boolean, _
+            Optional RetVal As Object) As Object
+    Const FUNC_NAME     As String = "InitRequest"
+    Const SNG_EPSILON   As Single = 0.0001
+    Static lUseXmlHttp  As Long
+    Dim lMili           As Long
+    
+    On Error GoTo EH
+    If lUseXmlHttp = 0 Then
+        lUseXmlHttp = IIf(Val(GetEnvironmentVar("_UCS_FISCAL_PRINTER_USE_XMLHTTP")) <> 0, 1, -1)
+    End If
+    '--- first try server-side XMLHTTP because it has timeouts
+    If lUseXmlHttp <> 1 And Timeout <> 30 Then
+        Set RetVal = CreateObject("MSXML2.ServerXMLHTTP")
+    End If
+    If Not RetVal Is Nothing Then
+        lMili = Switch(Timeout < -SNG_EPSILON, 0, Timeout > SNG_EPSILON, Timeout, True, 30) * 1000
+        RetVal.SetTimeouts 5000, 5000, lMili, lMili
+    Else
+        Set RetVal = CreateObject("MSXML2.XMLHTTP")
+    End If
+    RetVal.Open sType, sUrl, Async
+    Set InitRequest = RetVal
+    Exit Function
+EH:
+    PrintError FUNC_NAME
+    Resume Next
+End Function
+
+Public Function ParseUrl(sUrl As String, uParsed As UcsParsedUrl) As Boolean
+    Const FUNC_NAME     As String = "ParseUrl"
+    
+    On Error GoTo EH
+    With CreateObject("VBScript.RegExp")
+        .Global = True
+        .Pattern = "^(.*)://(?:(?:([^:]*):)?([^@]*)@)?([A-Za-z0-9\-\.]+)(:[0-9]+)?(.*)$"
+        With .Execute(sUrl)
+            If .Count > 0 Then
+                With .Item(0).SubMatches
+                    uParsed.Protocol = .Item(0)
+                    uParsed.User = .Item(1)
+                    If LenB(uParsed.User) = 0 Then
+                        uParsed.User = .Item(2)
+                    Else
+                        uParsed.Pass = .Item(2)
+                    End If
+                    uParsed.Host = .Item(3)
+                    uParsed.Port = Val(Mid$(.Item(4), 2))
+                    If uParsed.Port = 0 Then
+                        Select Case LCase$(uParsed.Protocol)
+                        Case "https"
+                            uParsed.Port = 443
+                        Case "socks5"
+                            uParsed.Port = 1080
+                        Case Else
+                            uParsed.Port = 80
+                        End Select
+                    End If
+                    uParsed.Path = .Item(5)
+                    If LenB(uParsed.Path) = 0 Then
+                        uParsed.Path = "/"
+                    End If
+                End With
+                ParseUrl = True
+            End If
+        End With
+    End With
+    Exit Function
+EH:
+    RaiseError FUNC_NAME
+End Function
+
+Public Function SetCurrentDateTimer(ByVal dDate As Date, dblTimer As Double, Optional Error As String) As Boolean
+    m_dCurrentStartDate = dDate
+    m_dblCurrentStartTimer = dblTimer
+    Error = vbNullString
+    '--- success
+    SetCurrentDateTimer = True
+End Function
+
+Property Get GetCurrentNow() As Date
+    If m_dCurrentStartDate = 0 Then
+        GetCurrentNow = VBA.Now
+    Else
+        GetCurrentNow = DateAdd("s", TimerEx - m_dblCurrentStartTimer, m_dCurrentStartDate)
+    End If
+End Property
+
+Property Get GetCurrentTimer() As Double
+    GetCurrentTimer = TimerEx - m_dblCurrentStartTimer
+End Property
+
+Property Get GetCurrentDate() As Date
+    GetCurrentDate = Fix(GetCurrentNow)
+End Property
+
+Public Function ToDeviceSerialNo(sText As String) As String
+    If preg_match("^[a-zA-Z]{2}\d{6}$", sText) > 0 Then
+        ToDeviceSerialNo = Trim$(sText)
+    End If
+End Function
+
+Public Function ConcatArrays(vSrc As Variant, vDst As Variant) As Variant
+    Const FUNC_NAME     As String = "ConcatArrays"
+    Dim vResult         As Variant
+    Dim lIdx            As Long
+    Dim vElem           As Variant
+
+    On Error GoTo EH
+    If IsArray(vSrc) Then
+        lIdx = lIdx + UBound(vSrc) - LBound(vSrc) + 1
+    End If
+    If IsArray(vDst) Then
+        lIdx = lIdx + UBound(vDst) - LBound(vDst) + 1
+    End If
+    If lIdx > 0 Then
+        ReDim vResult(0 To lIdx - 1) As Variant
+        lIdx = 0
+        If IsArray(vSrc) Then
+            For Each vElem In vSrc
+                AssignVariant vResult(lIdx), vElem
+                lIdx = lIdx + 1
+            Next
+        End If
+        If IsArray(vDst) Then
+            For Each vElem In vDst
+                AssignVariant vResult(lIdx), vElem
+                lIdx = lIdx + 1
+            Next
+        End If
+    End If
+    ConcatArrays = vResult
+    Exit Function
+EH:
+    RaiseError FUNC_NAME
+End Function
+
+Public Function ParseExtendedDate(sText As String) As Date
+    Dim vMatches        As Variant
+    Dim lYear           As Long
+    
+    On Error GoTo QH
+    ParseExtendedDate = C_Date(sText)
+    If preg_match("\d+", sText, vMatches) > 0 Then
+        If C_Lng(At(vMatches, 0)) < 2000 Then
+            lYear = At(vMatches, 2)
+            ParseExtendedDate = DateSerial(IIf(lYear < 2000, lYear + 2000, lYear), At(vMatches, 1), At(vMatches, 0))
+        Else
+            ParseExtendedDate = DateSerial(At(vMatches, 0), At(vMatches, 1), At(vMatches, 2))
+        End If
+        ParseExtendedDate = ParseExtendedDate + TimeSerial(At(vMatches, 3), At(vMatches, 4), At(vMatches, 5, 0))
+    End If
+QH:
+End Function
+
+Public Property Get IsLogDebugEnabled() As Boolean
+    IsLogDebugEnabled = Logger.LogLevel >= vbLogEventTypeDebug
+End Property
+
+Public Property Get IsLogDataDumpEnabled() As Boolean
+    IsLogDataDumpEnabled = Logger.LogLevel >= vbLogEventTypeDataDump
+End Property
+
+Public Function PathCombine(sPath As String, sFile As String) As String
+    PathCombine = sPath & IIf(LenB(sPath) <> 0 And Right$(sPath, 1) <> "\" And LenB(sFile) <> 0, "\", vbNullString) & sFile
+End Function
+
+Public Function GetPmtTypeName(ByVal PmtType As UcsFiscalPaymentTypeEnum) As String
+    GetPmtTypeName = At(Split(STR_VL_PMTTYPE_NAME, "|"), PmtType - 1, "N/A") & " (" & PmtType & ")"
+End Function
+
+Public Function GetDiscTypeName(ByVal DiscType As UcsFiscalDiscountTypeEnum) As String
+    GetDiscTypeName = At(Split(STR_VL_DISCTYPE_NAME, "|"), DiscType - 1, "N/A") & " (" & DiscType & ")"
+End Function
+
+Public Function GetReportTypeName(ByVal ReportType As UcsFiscalReportsTypeEnum) As String
+    GetReportTypeName = At(Split(STR_VL_REPORTTYPE_NAME, "|"), ReportType, "N/A") & " (" & ReportType & ")"
+End Function
+
+Public Function ConcatCollection(oCol As Collection, Optional Separator As String = "") As String
+    Const FUNC_NAME     As String = "ConcatCollection"
+    Dim lSize           As Long
+    Dim vElem           As Variant
+    
+    On Error GoTo EH
+    For Each vElem In oCol
+        lSize = lSize + Len(vElem) + Len(Separator)
+    Next
+    If lSize > 0 Then
+        ConcatCollection = String$(lSize - Len(Separator), 0)
+        lSize = 1
+        For Each vElem In oCol
+            If lSize <= Len(ConcatCollection) Then
+                Mid$(ConcatCollection, lSize, Len(vElem) + Len(Separator)) = vElem & Separator
+            End If
+            lSize = lSize + Len(vElem) + Len(Separator)
+        Next
+    End If
+    Exit Function
+EH:
+    RaiseError FUNC_NAME
+End Function
+
+Public Function GetMd5Long(sText As String) As Long
+    Const FUNC_NAME     As String = "GetMd5Long"
+    Const PROV_RSA_FULL                 As Long = 1
+    Const CRYPT_VERIFYCONTEXT           As Long = &HF0000000
+    Const CALG_MD5                      As Long = &H8003&
+    Const HP_HASHVAL                    As Long = 2
+    Static hProv        As Long
+    Static aBuffer(0 To 3) As Long
+    Dim hHash           As Long
+    
+    On Error GoTo EH
+    If hProv = 0 Then
+        Call CryptAcquireContext(hProv, 0, 0, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)
+    End If
+    If CryptCreateHash(hProv, CALG_MD5, 0, 0, hHash) = 0 Then
+        GoTo QH
+    End If
+    If CryptHashData(hHash, ByVal StrPtr(sText), LenB(sText), 0) = 0 Then
+        GoTo QH
+    End If
+    If CryptGetHashParam(hHash, HP_HASHVAL, aBuffer(0), 16, 0) = 0 Then
+        GoTo QH
+    End If
+    GetMd5Long = aBuffer(0) Xor aBuffer(1) Xor aBuffer(2) Xor aBuffer(3)
+QH:
+    If hHash <> 0 Then
+        Call CryptDestroyHash(hHash)
+    End If
+    Exit Function
+EH:
+    RaiseError FUNC_NAME
+End Function
+
+Public Function GetErrorComputerName(Optional ByVal NoSession As Boolean) As String
+    Const SM_REMOTESESSION              As Long = &H1000
+    Dim lSize           As Long
+    
+    If LenB(m_sErrComputerName) = 0 Then
+        m_sErrComputerName = Space$(256): lSize = 255
+        If GetComputerName(m_sErrComputerName, lSize) > 0 Then
+            m_sErrComputerName = Left$(m_sErrComputerName, lSize)
+        Else
+            m_sErrComputerName = vbNullString
+        End If
+    End If
+    GetErrorComputerName = m_sErrComputerName
+    If GetSystemMetrics(SM_REMOTESESSION) <> 0 And Not NoSession Then
+        lSize = -1
+        On Error Resume Next '--- checked
+        Call ProcessIdToSessionId(GetCurrentProcessId(), lSize)
+        On Error GoTo 0
+        If lSize <> -1 Then
+            GetErrorComputerName = GetErrorComputerName & ":" & lSize
+        End If
+    End If
+End Function
+
+Public Function ToHex(baData() As Byte) As String
+    Dim lIdx            As Long
+    Dim sByte           As String
+    
+    ToHex = String$(UBound(baData) * 2 + 2, 48)
+    For lIdx = 0 To UBound(baData)
+        sByte = LCase$(Hex$(baData(lIdx)))
+        Mid$(ToHex, lIdx * 2 + 3 - Len(sByte)) = sByte
+    Next
+End Function
+
+Public Function FromBase64Array(sText As String) As Byte()
+    Dim lSize           As Long
+    Dim baOutput()      As Byte
+    
+    On Error GoTo EH
+    lSize = Len(sText) + 1
+    ReDim baOutput(0 To lSize - 1) As Byte
+    If CryptStringToBinary(StrPtr(sText), Len(sText), CRYPT_STRING_BASE64, VarPtr(baOutput(0)), lSize) <> 0 Then
+        ReDim Preserve baOutput(0 To lSize - 1) As Byte
+        FromBase64Array = baOutput
+        Exit Function
+    End If
+EH:
+    With CreateObject("MSXML2.DOMDocument").createElement("dummy")
+        .DataType = "bin.base64"
+        .Text = sText
+        If IsArray(.NodeTypedValue) Then
+            FromBase64Array = .NodeTypedValue
+        Else
+            FromBase64Array = vbNullString
+        End If
+    End With
+End Function
+
+Public Function GetPrinterPort(sPrinterName As String) As String
+    Dim hPrinter        As Long
+    Dim lNeeded         As Long
+    Dim aInfoData()     As Long
+    
+    If OpenPrinter(StrPtr(sPrinterName), hPrinter, 0) <> 0 Then
+        Call GetPrinter(hPrinter, 2, ByVal 0, 0, lNeeded)
+        ReDim aInfoData(0 To lNeeded \ 4) As Long
+        Call GetPrinter(hPrinter, 2, aInfoData(0), lNeeded, lNeeded)
+        Call ClosePrinter(hPrinter)
+    End If
+    If UBound(aInfoData) >= 3 Then
+        GetPrinterPort = pvToString(aInfoData(3))
+    End If
+End Function
+

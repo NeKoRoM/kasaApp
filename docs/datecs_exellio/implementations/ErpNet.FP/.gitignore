@@ -1,0 +1,15 @@
+bin/
+obj/
+.vs/
+.vscode/
+.cr/
+debug.log
+debug.log.*
+*.user
+Published/
+Output/
+.DS_Store
+ErpNet.FP.Server/appsettings.json
+ErpNet.FP.Setup/ProductInstallFiles.wxs
+/UpgradeLog.htm
+/ErpNet.FP.Setup/HeatWaveConvert.log

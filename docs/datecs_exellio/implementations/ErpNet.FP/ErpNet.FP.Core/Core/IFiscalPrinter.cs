@@ -1,0 +1,137 @@
+﻿using System;
+
+namespace ErpNet.FP.Core
+{
+    /// <summary>
+    /// Represents the capabilities of a connected fiscal printer.
+    /// </summary>
+    public interface IFiscalPrinter
+    {
+        /// <summary>
+        /// Gets information about the connected device.
+        /// </summary>
+        /// <returns>Device information.</returns>
+        DeviceInfo DeviceInfo { get; }
+
+        /// <summary>
+        /// Checks whether the device is currently ready to accept commands.
+        /// </summary>
+        DeviceStatusWithDateTime CheckStatus();
+
+        /// <summary>
+        /// Gets the amount of cash available
+        /// </summary>
+        DeviceStatusWithCashAmount Cash(Credentials credentials);
+
+        /// <summary>
+        /// Sets the device date and time
+        /// </summary>
+        DeviceStatus SetDateTime(CurrentDateTime currentDateTime);
+
+        /// <summary>
+        /// Prints the specified receipt.
+        /// </summary>
+        /// <param name="receipt">The receipt to print.</param>
+        (ReceiptInfo, DeviceStatus) PrintReceipt(Receipt receipt);
+
+        /// <summary>
+        /// Validates the receipt object
+        /// </summary>
+        /// <param name="receipt"></param>
+        /// <returns></returns>
+        DeviceStatus ValidateReceipt(Receipt receipt);
+
+        /// <summary>
+        /// Prints the specified reversal receipt.
+        /// </summary>
+        /// <param name="reversalReceipt">The reversal receipt.</param>
+        /// <returns></returns>
+        (ReceiptInfo, DeviceStatus) PrintReversalReceipt(ReversalReceipt reversalReceipt);
+
+        /// <summary>
+        /// Validates the reversal receipt object
+        /// </summary>
+        /// <param name="reversalReceipt"></param>
+        /// <returns></returns>
+        DeviceStatus ValidateReversalReceipt(ReversalReceipt reversalReceipt);
+
+        /// <summary>
+        /// Prints a native invoice (an extended fiscal receipt with a recipient block).
+        /// Drivers that do not implement it return an E413 "not implemented" status.
+        /// </summary>
+        (ReceiptInfo, DeviceStatus) PrintInvoice(Invoice invoice);
+
+        /// <summary>
+        /// Validates the invoice object.
+        /// </summary>
+        DeviceStatus ValidateInvoice(Invoice invoice);
+
+        /// <summary>
+        /// Prints a native credit note (an extended fiscal reversal against an original invoice).
+        /// Drivers that do not implement it return an E413 "not implemented" status.
+        /// </summary>
+        (ReceiptInfo, DeviceStatus) PrintCreditNote(CreditNote creditNote);
+
+        /// <summary>
+        /// Validates the credit note object.
+        /// </summary>
+        DeviceStatus ValidateCreditNote(CreditNote creditNote);
+
+        /// <summary>
+        /// Prints a deposit money note.
+        /// </summary>
+        /// <param name="amount">The deposited amount. Should be greater than 0.</param>
+        DeviceStatus PrintMoneyDeposit(TransferAmount transferAmount);
+
+        /// <summary>
+        /// Prints a withdraw money note.
+        /// </summary>
+        /// <param name="amount">The withdrawn amount. Should be greater than 0.</param>
+        DeviceStatus PrintMoneyWithdraw(TransferAmount transferAmount);
+
+        /// <summary>
+        /// Validates transfer amount object
+        /// </summary>
+        /// <param name="transferAmount"></param>
+        /// <returns></returns>
+        DeviceStatus ValidateTransferAmount(TransferAmount transferAmount);
+
+        /// <summary>
+        /// Prints a zreport.
+        /// </summary>
+        DeviceStatus PrintZReport(Credentials credentials);
+
+        /// <summary>
+        /// Prints a xreport.
+        /// </summary>
+        DeviceStatus PrintXReport(Credentials credentials);
+
+        /// <summary>
+        /// Prints a fiscal memory report for a custom period (from date to date).
+        /// Drivers that do not implement it return an E413 "not implemented" status.
+        /// </summary>
+        DeviceStatus PrintPeriodReport(PeriodReport periodReport);
+
+        /// <summary>
+        /// Validates the period report object.
+        /// </summary>
+        DeviceStatus ValidatePeriodReport(PeriodReport periodReport);
+
+        /// <summary>
+        /// Prints duplicate of the last fiscal receipt.
+        /// </summary>
+        DeviceStatus PrintDuplicate(Credentials credentials);
+
+        /// <summary>
+        /// Raw request.
+        /// </summary>
+        DeviceStatusWithRawResponse RawRequest(RequestFrame requestFrame);
+
+        /// <summary>
+        /// Tries to fix the erroneous state of the device to the normal - ready for printing state
+        /// </summary>
+        DeviceStatusWithDateTime Reset(Credentials credentials);
+
+        void SetDeadLine(DateTime deadLine);
+    }
+}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/bar_mode"
+        android:icon="@drawable/ic_scanner"
+        android:title="@string/BarMode"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/bd_mode"
+        android:title="@string/BDMode"
+        android:icon="@drawable/ic_list"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/settings"
+        android:title="@string/Settings"
+        android:icon="@drawable/ic_settings"
+        app:showAsAction="ifRoom"/>
+
+
+</menu>

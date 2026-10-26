@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+
+    <ScrollView
+        android:id="@+id/scrollableView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="40dp"
+            tools:context=".EditItem">
+
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                tools:layout_editor_absoluteX="40dp"
+                tools:layout_editor_absoluteY="-146dp">
+
+                <TextView
+                    android:id="@+id/code"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/codeTV" />
+
+                <EditText
+                    android:id="@+id/editCode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+                    android:inputType="number"
+                    android:maxLength="6"
+                    android:minHeight="48dp" />
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/nameTV" />
+
+                <EditText
+                    android:id="@+id/editName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+                    android:ems="10"
+                    android:inputType="textCapCharacters"
+                    android:maxLength="52"
+                    android:text="" />
+
+                <TextView
+                    android:id="@+id/price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/priceTV" />
+
+                <EditText
+                    android:id="@+id/editPrice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+
+                    android:digits="0123456789."
+                    android:inputType="numberDecimal"
+                    android:maxLength="11"
+                    android:minHeight="48dp"
+                    android:text="" />
+
+                <TextView
+
+                    android:id="@+id/UKTZED"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/uktzedTV" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal">
+
+
+                    <EditText
+                        android:id="@+id/editUKTZED"
+                        android:layout_width="200dp"
+                        android:layout_height="wrap_content"
+                        android:ems="10"
+                        android:inputType="number"
+                        android:maxLength="10"
+                        android:minHeight="48dp"
+                        android:text="" />
+
+                    <Spinner
+
+
+                        android:id="@+id/spinnerUktz"
+                        style="@android:style/Widget.Spinner"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
+                        android:popupBackground="#530960" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/TAX"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/taxTV" />
+
+                <!--            <EditText-->
+                <!--                android:id="@+id/editTAX"-->
+                <!--                android:inputType="number"-->
+                <!--                android:digits="12345678"-->
+                <!--                android:maxLength="1"-->
+                <!--                android:layout_width="match_parent"-->
+                <!--                android:layout_height="wrap_content"-->
+                <!--                android:minHeight="48dp"-->
+                <!--                android:text="1" />-->
+                <Spinner
+                    android:id="@+id/spinnerPdv"
+                    style="@android:style/Widget.Spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="10dp"
+
+                    android:popupBackground="#530960" />
+
+
+                <TextView
+                    android:id="@+id/group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/groupTV" />
+
+                <Spinner
+
+
+                    android:id="@+id/spinnerGroup"
+                    style="@android:style/Widget.Spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginBottom="10dp"
+                    android:popupBackground="#530960" />
+
+                <EditText
+                    android:id="@+id/editGroup"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="3dp"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:minHeight="48dp"
+                    android:text="1"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/produktInSet"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/produktinsetTV" />
+
+                <Spinner
+                    android:id="@+id/spinner_product_in_set"
+                    style="@android:style/Widget.Spinner"
+                    android:layout_width="match_parent"
+                    android:layout_marginBottom="10dp"
+                    android:layout_height="50dp"
+                    android:popupBackground="#530960" />
+
+
+                <!--            <EditText-->
+                <!--                android:id="@+id/editProduktInSet"-->
+                <!--                android:inputType="number"-->
+                <!--                android:digits="01234"-->
+                <!--                android:maxLength="1"-->
+                <!--                android:layout_width="match_parent"-->
+                <!--                android:layout_height="wrap_content"-->
+                <!--                android:layout_marginBottom="35dp"-->
+                <!--                android:ems="10"-->
+                <!--                android:text="0" />-->
+
+                <TextView
+                    android:id="@+id/unit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="@string/unitTV" />
+
+
+                <!--            <EditText-->
+                <!--                android:id="@+id/editUnit"-->
+                <!--                android:layout_width="match_parent"-->
+                <!--                android:layout_height="wrap_content"-->
+                <!--                android:layout_marginBottom="35dp"-->
+                <!--                android:ems="10"-->
+                <!--                android:inputType="textPersonName"-->
+                <!--                android:minHeight="48dp"-->
+                <!--                android:text="1" />-->
+
+                <Spinner
+                    android:id="@+id/spinnerUnit"
+                    style="@android:style/Widget.Spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:popupBackground="#530960" />
+
+
+                <!--                <Button-->
+                <!--                    android:id="@+id/buttonSendArticle"-->
+                <!--                    android:layout_width="wrap_content"-->
+                <!--                    android:layout_height="wrap_content"-->
+                <!--                    android:layout_marginStart="100dp"-->
+                <!--                    android:text="@string/set_articleTV" />-->
+
+                <!--            <MultiAutoCompleteTextView-->
+                <!--                android:id="@+id/multiAutoCompleteTextView"-->
+                <!--                android:layout_width="match_parent"-->
+                <!--                android:layout_height="wrap_content"-->
+                <!--                android:text="MultiAutoCompleteTextView" />-->
+
+
+                <TextView
+                    android:id="@+id/bar1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:text="@string/bar1TV" />
+
+                <EditText
+                    android:id="@+id/editBar1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:inputType="number"
+                    android:maxLength="13"
+                    android:minHeight="48dp"
+                    android:text="0" />
+
+                <Button
+                    android:id="@+id/buttonBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/scan_barTV" />
+
+
+
+                <TextView
+                    android:id="@+id/remainder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/remainderTV" />
+
+                <EditText
+                    android:id="@+id/editRemainder"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+                    android:digits="-0123456789."
+                    android:ems="10"
+                    android:inputType="numberDecimal"
+                    android:minHeight="48dp"
+                    android:text="0.000" />
+
+
+                <TextView
+                    android:id="@+id/type"
+                    android:layout_width="match_parent"
+
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:text="@string/typeTV" />
+
+                <EditText
+                    android:id="@+id/editType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+                    android:digits="012"
+                    android:ems="10"
+                    android:visibility="gone"
+                    android:inputType="number"
+                    android:maxLength="1"
+                    android:minHeight="48dp"
+                    android:text="0" />
+
+                <Spinner
+                    android:id="@+id/spinnerType"
+                    style="@android:style/Widget.Spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:popupBackground="#530960" />
+
+                <TextView
+                    android:id="@+id/section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sectionTV" />
+
+                <EditText
+                    android:id="@+id/editSection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+                    android:inputType="number"
+                    android:maxLength="2"
+                    android:minHeight="48dp"
+                    android:text="1" />
+
+                <TextView
+                    android:id="@+id/bar2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bar2TV" />
+
+                <EditText
+                    android:id="@+id/editBar2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:maxLength="13"
+                    android:text="0" />
+                <Button
+                    android:id="@+id/buttonBar2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/scan_barTV" />
+
+                <TextView
+                    android:id="@+id/bar3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bar3TV" />
+
+                <EditText
+                    android:id="@+id/editBar3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:maxLength="13"
+                    android:text="0" />
+                <Button
+                    android:id="@+id/buttonBar3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/scan_barTV" />
+
+                <TextView
+                    android:id="@+id/bar4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bar4TV" />
+
+                <EditText
+                    android:id="@+id/editBar4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:maxLength="13"
+                    android:text="0" />
+
+                <TextView
+                    android:id="@+id/salesAmount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:text="@string/salesamounTV" />
+
+                <EditText
+                    android:id="@+id/editSalesAmount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    android:text="0.00" />
+
+                <TextView
+                    android:id="@+id/salesCount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/salescountTV" />
+
+                <EditText
+                    android:id="@+id/editSalesCount"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="35dp"
+                    android:ems="10"
+                    android:focusable="false"
+                    android:inputType="textPersonName"
+                    android:minHeight="48dp"
+                    android:text="0.000" />
+            </LinearLayout>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </ScrollView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/purple_700"/>
+    <Button
+        android:id="@+id/buttonSendArticle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:backgroundTint="@color/green"
+        android:text="@string/set_articleTV" />
+</LinearLayout>
+
